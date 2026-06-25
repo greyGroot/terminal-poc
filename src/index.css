@@ -1,0 +1,605 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@400;700;900&display=swap');
+
+:root {
+  --mc-red: #EB001B;
+  --mc-orange: #FF5F00;
+  --mc-dark: #0A0A0A;
+  --mc-darker: #050505;
+  --text-main: #FFFFFF;
+  --text-muted: #A0A0A0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  background-color: var(--mc-darker);
+  color: var(--text-main);
+  font-family: 'Inter', sans-serif;
+  overflow: hidden; /* Hide scrollbars for fullscreen apps */
+  width: 100vw;
+  height: 100vh;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+.fullscreen-view {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background: radial-gradient(circle at center, var(--mc-dark) 0%, var(--mc-darker) 100%);
+}
+
+h1, h2, h3 {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Typography Helpers */
+.title {
+  font-size: 3rem;
+  font-weight: 900;
+  text-align: center;
+  background: linear-gradient(90deg, var(--mc-red), var(--mc-orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+/* Admin Panel */
+.admin-container {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.admin-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(10px);
+}
+
+.input-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.input-group input {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+  border-color: var(--mc-orange);
+}
+
+/* Buttons */
+.btn {
+  background: linear-gradient(90deg, var(--mc-red), var(--mc-orange));
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(235, 0, 27, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-transform: uppercase;
+}
+
+.btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(255, 95, 0, 0.6);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-danger {
+  background: transparent;
+  border: 2px solid var(--mc-red);
+  box-shadow: none;
+}
+
+.btn-danger:hover {
+  background: rgba(235, 0, 27, 0.1);
+  box-shadow: none;
+}
+
+/* Animations & TV Grid */
+.records-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+  width: 90%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.record-container {
+  aspect-ratio: 1;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.record-disc {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+  animation: spin 4s linear infinite;
+}
+
+/* Background for the golden disc */
+.record-bg-gold {
+  background: 
+    radial-gradient(
+      circle, 
+      transparent 55%, 
+      rgba(0,0,0,0.5) 90%, 
+      #ff5500 100%
+    ),
+    repeating-radial-gradient(
+      transparent, 
+      transparent 1px, 
+      rgba(0, 0, 0, 0.15) 2px, 
+      transparent 3px
+    ),
+    conic-gradient(
+      from 45deg, 
+      #b24d00 0deg 30deg, 
+      #f28500 30deg 75deg, 
+      #ffcc66 75deg 105deg, 
+      #f28500 105deg 150deg, 
+      #b24d00 150deg 210deg, 
+      #f28500 210deg 255deg, 
+      #ffcc66 255deg 285deg, 
+      #f28500 285deg 330deg, 
+      #b24d00 330deg 360deg
+    );
+  border: 2px solid #ff5500;
+  box-shadow: 0 0 20px rgba(255, 85, 0, 0.6), inset 0 0 10px rgba(0,0,0,0.8);
+}
+
+/* Background for the reverse side (iPad dark vinyl style) */
+.record-bg-dark-ipad {
+  background: 
+    radial-gradient(
+      circle, 
+      transparent 60%, 
+      rgba(0,0,0,0.6) 95%, 
+      rgba(255, 85, 0, 0.4) 100%
+    ),
+    repeating-radial-gradient(
+      transparent, 
+      transparent 1px, 
+      rgba(0,0,0,0.4) 2px, 
+      transparent 3px
+    ),
+    conic-gradient(
+      from 45deg, 
+      #111 0deg 45deg, 
+      #3a1a00 45deg 90deg, 
+      #111 90deg 135deg, 
+      #3a1a00 135deg 180deg, 
+      #111 180deg 225deg, 
+      #3a1a00 225deg 270deg, 
+      #111 270deg 315deg, 
+      #3a1a00 315deg 360deg
+    );
+  border: 2px solid #ff5500;
+  box-shadow: 0 0 25px #ff5500, inset 0 0 25px rgba(255, 85, 0, 0.8);
+}
+
+/* Background for the dark disc */
+.record-bg-dark {
+  background: 
+    repeating-radial-gradient(
+      rgba(255, 255, 255, 0), 
+      rgba(255, 255, 255, 0) 2px, 
+      rgba(255, 255, 255, 0.05) 3px, 
+      rgba(255, 255, 255, 0) 4px
+    ),
+    conic-gradient(
+      from 0deg, 
+      #0a0a0a 0deg 45deg, 
+      #1f1f1f 45deg 90deg, 
+      #0a0a0a 90deg 135deg, 
+      #1f1f1f 135deg 180deg, 
+      #0a0a0a 180deg 225deg, 
+      #1f1f1f 225deg 270deg, 
+      #0a0a0a 270deg 315deg, 
+      #1f1f1f 315deg 360deg
+    );
+  border: 1px solid #000;
+  box-shadow: inset 0 0 20px #000, 0 0 15px rgba(0,0,0,0.8);
+}
+
+.record-center {
+  width: 35%;
+  height: 35%;
+  border-radius: 50%;
+  background: #0a0a0a;
+  position: relative;
+  z-index: 2;
+  border: 1px solid rgba(255, 100, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 15px rgba(0,0,0,0.9);
+}
+
+.record-center::after {
+  content: '';
+  width: 14px;
+  height: 14px;
+  background: #cddc39;
+  border-radius: 50%;
+  border: 4px solid #111;
+  box-shadow: 0 0 5px rgba(0,0,0,0.8);
+}
+
+/* Modifiers */
+.glowing {
+  box-shadow: 0 0 20px rgba(255, 95, 0, 0.8), inset 0 0 10px #000;
+}
+
+.active-pulse {
+  animation: flash-pulse 0.4s alternate infinite;
+}
+
+@keyframes flash-pulse {
+  0% { opacity: 0.5; box-shadow: 0 0 10px rgba(255, 95, 0, 0.5); }
+  100% { opacity: 1; box-shadow: 0 0 40px rgba(255, 95, 0, 1), 0 0 60px rgba(235, 0, 27, 0.8); background: #ffaa00; }
+}
+
+.spinning {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Overlays */
+.tv-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  pointer-events: none;
+  text-align: center;
+}
+
+/* Big Vinyl Result Screen */
+.big-vinyl-container {
+  position: relative;
+  width: 650px;
+  height: 650px;
+  margin: 0 auto;
+  border-radius: 50%;
+  box-shadow: 0 0 100px rgba(255, 95, 0, 0.8), inset 0 0 50px rgba(0,0,0,0.8);
+  background: conic-gradient(
+    from 0deg, 
+    #050505 0deg 45deg, 
+    #1a1a1a 45deg 90deg, 
+    #050505 90deg 135deg, 
+    #1a1a1a 135deg 180deg, 
+    #050505 180deg 225deg, 
+    #1a1a1a 225deg 270deg, 
+    #050505 270deg 315deg, 
+    #1a1a1a 315deg 360deg
+  );
+  border: 4px solid var(--mc-orange);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  animation: float 4s ease-in-out infinite;
+  z-index: 5;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+
+.big-vinyl-content {
+  text-align: center;
+  z-index: 10;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80%;
+}
+
+.confetti {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0; left: 0;
+  pointer-events: none;
+  background-image: 
+    radial-gradient(circle at 20% 30%, #ff8a00 3px, transparent 4px),
+    radial-gradient(circle at 80% 20%, #e52e71 3px, transparent 4px),
+    radial-gradient(circle at 40% 70%, #ff8a00 4px, transparent 5px),
+    radial-gradient(circle at 70% 80%, #fff 2px, transparent 3px),
+    radial-gradient(circle at 10% 80%, #ff8a00 3px, transparent 4px),
+    radial-gradient(circle at 90% 60%, #e52e71 3px, transparent 4px),
+    radial-gradient(circle at 50% 10%, #fff 2px, transparent 3px),
+    radial-gradient(circle at 30% 90%, #ff8a00 4px, transparent 5px);
+  background-size: 250px 250px;
+  animation: confetti-drift 15s linear infinite;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+@keyframes confetti-drift {
+  from { background-position: 0 0; }
+  to { background-position: 500px 500px; }
+}
+
+/* Hidden unlock trigger area for iPad */
+.unlock-trigger {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  z-index: 9999;
+  /* background: rgba(255, 0, 0, 0.2); Uncomment for debugging */
+}
+
+/* Fade Transitions */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* iPad Panels */
+.ipad-layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  background: #000;
+  color: #fff;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.ipad-panels {
+  display: flex;
+  flex: 1;
+  gap: 1.5rem;
+  align-items: stretch;
+  margin-bottom: 1rem;
+}
+
+.ipad-panel {
+  border-radius: 20px;
+  border: 2px solid rgba(255, 95, 0, 0.2);
+  box-shadow: 0 0 20px rgba(255, 95, 0, 0.05), inset 0 0 20px rgba(255, 95, 0, 0.05);
+  background: linear-gradient(180deg, #111, #000);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.ipad-panel.side {
+  flex: 1;
+  opacity: 0.9;
+}
+
+.ipad-panel.center {
+  flex: 1.5;
+  border: 3px solid rgba(255, 95, 0, 0.6);
+  box-shadow: 0 0 40px rgba(255, 95, 0, 0.2), inset 0 0 30px rgba(255, 95, 0, 0.1);
+  background: linear-gradient(180deg, #1a1a1a, #050505);
+}
+
+.mc-btn {
+  background: linear-gradient(90deg, #ff5f00, #eb001b);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 700;
+  padding: 1.5rem 3rem;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(255, 95, 0, 0.3);
+  transition: transform 0.1s, box-shadow 0.1s;
+  width: 90%;
+  max-width: 400px;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 1px;
+}
+.mc-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 5px 10px rgba(255, 95, 0, 0.5);
+}
+
+.mc-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 2.5rem;
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  margin-bottom: 2rem;
+  outline: none;
+  font-family: 'Outfit', sans-serif;
+}
+.mc-input:focus {
+  border-color: var(--mc-orange);
+  box-shadow: 0 0 15px rgba(255, 95, 0, 0.3);
+}
+
+.ipad-vinyl-player {
+  position: relative;
+  width: 360px;
+  height: 360px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1a1a1a, #050505);
+  border: 2px solid #222;
+  box-shadow: 10px 20px 40px rgba(0,0,0,0.8), inset 2px 2px 5px rgba(255,255,255,0.05);
+  transform-style: preserve-3d;
+  transform: rotateX(25deg) rotateZ(-5deg);
+  transition: transform 0.5s ease;
+  margin-top: -20px;
+}
+
+.ipad-vinyl-player.dimmed {
+  opacity: 0.5;
+  transform: rotateX(25deg) rotateZ(-5deg) scale(0.95);
+}
+
+.ipad-platter {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 4px solid #ff5500;
+  box-shadow: 0 0 30px #ff5500, inset 0 0 20px rgba(255, 85, 0, 0.8);
+  position: relative;
+}
+
+.ipad-vinyl-record {
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: 
+    repeating-radial-gradient(
+      transparent, 
+      transparent 1px, 
+      rgba(0,0,0,0.4) 2px, 
+      transparent 3px
+    ),
+    conic-gradient(
+      from 45deg, 
+      #111 0deg 45deg, 
+      #3a1a00 45deg 90deg, 
+      #111 90deg 135deg, 
+      #3a1a00 135deg 180deg, 
+      #111 180deg 225deg, 
+      #3a1a00 225deg 270deg, 
+      #111 270deg 315deg, 
+      #3a1a00 315deg 360deg
+    );
+  border: 1px solid #000;
+  box-shadow: inset 0 0 40px #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ipad-vinyl-label {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: #111;
+  border: 3px solid #ff5500;
+  box-shadow: 0 0 15px #ff5500, inset 0 0 20px #000;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ipad-vinyl-label::after {
+  content: '';
+  width: 14px;
+  height: 14px;
+  background: #cddc39;
+  border-radius: 50%;
+  border: 4px solid #000;
+}
+
+.ipad-tonearm {
+  position: absolute;
+  top: 10px;
+  right: -20px;
+  transform-origin: 90px 40px;
+  transform: rotate(-15deg);
+  transition: transform 1s ease-in-out;
+  z-index: 10;
+  filter: drop-shadow(15px 20px 10px rgba(0,0,0,0.9));
+}
+
+.ipad-tonearm.playing {
+  transform: rotate(15deg);
+}
