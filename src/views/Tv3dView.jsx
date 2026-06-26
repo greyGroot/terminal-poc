@@ -572,7 +572,84 @@ function RecordsGrid3D({ gameState, activeIndices, winnerIndex, resultData, text
   );
 }
 
-// Confetti removed by user request
+function CameraController() {
+  useFrame((state) => {
+    const t = state.clock.getElapsedTime();
+    // Gentle drift around the initial camera position [0, 0, 13]
+    state.camera.position.x = Math.sin(t * 0.15) * 0.45;
+    state.camera.position.y = Math.cos(t * 0.18) * 0.35;
+    state.camera.position.z = 13 + Math.sin(t * 0.1) * 0.2;
+    state.camera.lookAt(0, 0, 0);
+  });
+  return null;
+}
+
+function FloatingGlowCircle({ color, size, initialPos, driftSpeed, driftRange }) {
+  const meshRef = useRef();
+  const seed = useMemo(() => Math.random() * 100, []);
+  
+  const texture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    
+    const cx = 128;
+    const cy = 128;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 128);
+    grad.addColorStop(0, color);
+    grad.addColorStop(0.4, color);
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 256, 256);
+    
+    const tex = new THREE.CanvasTexture(canvas);
+    return tex;
+  }, [color]);
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      const t = state.clock.getElapsedTime() * driftSpeed + seed;
+      // Slow float movement
+      meshRef.current.position.x = initialPos[0] + Math.sin(t) * driftRange[0];
+      meshRef.current.position.y = initialPos[1] + Math.cos(t * 0.8) * driftRange[1];
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={initialPos}>
+      <planeGeometry args={[size, size]} />
+      <meshBasicMaterial map={texture} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+    </mesh>
+  );
+}
+
+function ParallaxBackground() {
+  const circles = useMemo(() => [
+    // Mastercard Red, Orange, Yellow glows at different depths
+    { id: 1, color: 'rgba(235, 0, 27, 0.15)', size: 8, pos: [-4, 3, -6], speed: 0.15, range: [1.2, 0.8] },
+    { id: 2, color: 'rgba(255, 95, 0, 0.15)', size: 9, pos: [4, -2, -8], speed: 0.12, range: [1.0, 1.2] },
+    { id: 3, color: 'rgba(247, 158, 27, 0.12)', size: 7, pos: [-3, -3, -5], speed: 0.18, range: [0.8, 1.0] },
+    { id: 4, color: 'rgba(255, 95, 0, 0.1)', size: 10, pos: [2, 3, -9], speed: 0.1, range: [1.5, 1.0] },
+    { id: 5, color: 'rgba(235, 0, 27, 0.12)', size: 6, pos: [-1, -1, -7], speed: 0.14, range: [0.9, 0.9] }
+  ], []);
+
+  return (
+    <group>
+      {circles.map((c) => (
+        <FloatingGlowCircle
+          key={c.id}
+          color={c.color}
+          size={c.size}
+          initialPos={c.pos}
+          driftSpeed={c.speed}
+          driftRange={c.range}
+        />
+      ))}
+    </group>
+  );
+}
 
 export default function Tv3dView() {
   const [state, setState] = useState('idle'); // idle, name_entered, roulette, winner_pulse, result
@@ -763,6 +840,12 @@ export default function Tv3dView() {
           
           {/* Warm sunset environment for realistic golden/copper reflections without cold white glares */}
           <Environment preset="sunset" />
+          
+          {/* Camera parallax drift controller */}
+          <CameraController />
+
+          {/* Mastercard branded parallax ambient background glow circles */}
+          <ParallaxBackground />
           
           <RecordsGrid3D
             gameState={state}
