@@ -479,6 +479,69 @@ function RecordsGrid3D({ gameState, activeIndices, winnerIndex, resultData, text
   );
 }
 
+// Confetti Background Particles Component
+function ConfettiParticle({ initialPos }) {
+  const meshRef = useRef();
+  const speed = useMemo(() => 0.6 + Math.random() * 1.2, []);
+  const rotSpeed = useMemo(() => ({
+    x: Math.random() * 1.5,
+    y: Math.random() * 1.5,
+    z: Math.random() * 1.5
+  }), []);
+  
+  const color = useMemo(() => {
+    const colors = ['#ff5500', '#eb001b', '#ffcc66', '#ff007f', '#ffffff', '#00aaff'];
+    return colors[Math.floor(Math.random() * colors.length)];
+  }, []);
+
+  const size = useMemo(() => 0.05 + Math.random() * 0.07, []);
+
+  useFrame((state, delta) => {
+    if (meshRef.current) {
+      // Fall down
+      meshRef.current.position.y -= delta * speed;
+      // Rotate
+      meshRef.current.rotation.x += delta * rotSpeed.x;
+      meshRef.current.rotation.y += delta * rotSpeed.y;
+      meshRef.current.rotation.z += delta * rotSpeed.z;
+
+      // Wrap around when it goes below screen (approx viewport height boundary)
+      if (meshRef.current.position.y < -6) {
+        meshRef.current.position.y = 6;
+        meshRef.current.position.x = (Math.random() - 0.5) * 12;
+      }
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={initialPos}>
+      <boxGeometry args={[size, size * 1.8, 0.005]} />
+      <meshBasicMaterial color={color} transparent opacity={0.65} />
+    </mesh>
+  );
+}
+
+function ConfettiBackground() {
+  const particles = useMemo(() => {
+    const arr = [];
+    for (let i = 0; i < 75; i++) {
+      const x = (Math.random() - 0.5) * 12;
+      const y = (Math.random() - 0.5) * 12;
+      const z = -3 - Math.random() * 4; // placed in the background behind grid
+      arr.push({ id: i, pos: [x, y, z] });
+    }
+    return arr;
+  }, []);
+
+  return (
+    <group>
+      {particles.map((p) => (
+        <ConfettiParticle key={p.id} initialPos={p.pos} />
+      ))}
+    </group>
+  );
+}
+
 export default function Tv3dView() {
   const [state, setState] = useState('idle'); // idle, name_entered, roulette, winner_pulse, result
   const [resultData, setResultData] = useState(null);
@@ -647,12 +710,16 @@ export default function Tv3dView() {
         outline: 'none', 
         marginBottom: '6rem'
       }}>
-        <Canvas>
-          <ambientLight intensity={0.5} />
-          {/* Main front highlights */}
-          <pointLight position={[0, 4, 6]} intensity={1.8} color="#ffffff" />
-          <pointLight position={[5, 5, 4]} intensity={1.2} color="#ffaa66" />
-          <pointLight position={[-5, -5, 4]} intensity={0.6} color="#ff7700" />
+        <Canvas camera={{ position: [0, 0, 13], fov: 28 }}>
+          <ambientLight intensity={0.7} />
+          {/* Neon Point Lights for beautiful cyber reflections */}
+          <pointLight position={[0, 4, 6]} intensity={1.5} color="#ffffff" />
+          <pointLight position={[-6, 6, 4]} intensity={3.0} color="#ff0055" /> {/* Neon Pink */}
+          <pointLight position={[6, -6, 4]} intensity={3.0} color="#00aaff" />  {/* Neon Cyan */}
+          <pointLight position={[0, 0, 3]} intensity={4.0} color="#ff5500" />   {/* Neon Orange aura in center */}
+          
+          {/* Confetti Background in 3D */}
+          <ConfettiBackground />
           
           <RecordsGrid3D
             gameState={state}
