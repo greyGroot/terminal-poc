@@ -12,37 +12,37 @@ const drawGoldRecord = (ctx, size) => {
   const cx = size / 2;
   const cy = size / 2;
   
-  // 1. Conic Gradient (copper-gold style)
+  // 1. High-Contrast Conic Gradient (vibrant gold and copper from image reference)
   const conic = ctx.createConicGradient(Math.PI / 4, cx, cy);
-  conic.addColorStop(0, '#b24d00');
-  conic.addColorStop(30/360, '#f28500');
-  conic.addColorStop(75/360, '#ffcc66');
-  conic.addColorStop(105/360, '#f28500');
-  conic.addColorStop(150/360, '#b24d00');
-  conic.addColorStop(210/360, '#f28500');
-  conic.addColorStop(255/360, '#ffcc66');
-  conic.addColorStop(285/360, '#f28500');
-  conic.addColorStop(330/360, '#b24d00');
-  conic.addColorStop(1, '#b24d00');
+  conic.addColorStop(0, '#8c4300');       // Rich deep copper-bronze shadow
+  conic.addColorStop(35/360, '#ffa800');  // Saturated warm gold
+  conic.addColorStop(75/360, '#fff0a6');  // Bright golden-white specular highlight
+  conic.addColorStop(110/360, '#ffa800'); // Saturated warm gold
+  conic.addColorStop(150/360, '#8c4300'); // Rich deep copper-bronze shadow
+  conic.addColorStop(215/360, '#ffa800'); // Saturated warm gold
+  conic.addColorStop(255/360, '#fff0a6'); // Bright golden-white specular highlight
+  conic.addColorStop(290/360, '#ffa800'); // Saturated warm gold
+  conic.addColorStop(330/360, '#8c4300'); // Rich deep copper-bronze shadow
+  conic.addColorStop(1, '#8c4300');
   
   ctx.fillStyle = conic;
   ctx.fillRect(0, 0, size, size);
   
-  // 2. Repeating grooves
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+  // 2. High-definition record groove lines
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
   ctx.lineWidth = 1;
-  for (let r = size * 0.18; r < size * 0.5; r += 3) {
+  for (let r = size * 0.18; r < size * 0.5; r += 3.5) {
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.stroke();
   }
   
-  // 3. Radial Gradient overlay
+  // 3. Radial Gradient overlay for glowing orange-copper outer edge
   const radial = ctx.createRadialGradient(cx, cy, size * 0.15, cx, cy, size * 0.5);
   radial.addColorStop(0, 'rgba(0, 0, 0, 0)');
-  radial.addColorStop(0.55, 'rgba(0, 0, 0, 0)');
-  radial.addColorStop(0.9, 'rgba(0, 0, 0, 0.4)');
-  radial.addColorStop(1, '#ff5500');
+  radial.addColorStop(0.65, 'rgba(0, 0, 0, 0)');
+  radial.addColorStop(0.9, 'rgba(0, 0, 0, 0.35)');
+  radial.addColorStop(1, '#ff6600');
   
   ctx.fillStyle = radial;
   ctx.beginPath();
@@ -130,20 +130,17 @@ const drawCenterHole = (ctx, size) => {
   const cx = size / 2;
   const cy = size / 2;
   
-  // Center dark circle
-  ctx.fillStyle = '#0a0a0a';
-  ctx.strokeStyle = 'rgba(255, 100, 0, 0.15)';
-  ctx.lineWidth = 2;
+  // Center deep solid black circle (clean contrast from image reference)
+  ctx.fillStyle = '#030303';
   ctx.beginPath();
   ctx.arc(cx, cy, size * 0.35 / 2, 0, Math.PI * 2);
   ctx.fill();
-  ctx.stroke();
   
-  // Center yellow-green pin
-  const pinRadius = size * 0.025;
-  ctx.fillStyle = '#cddc39';
-  ctx.strokeStyle = '#111';
-  ctx.lineWidth = 3;
+  // Center pin (bright orange-gold dot matching image reference)
+  const pinRadius = size * 0.022;
+  ctx.fillStyle = '#ffa800';
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.arc(cx, cy, pinRadius, 0, Math.PI * 2);
   ctx.fill();
@@ -211,8 +208,8 @@ function Record3D({ index, position, gameState, isActive, isPulse, isHidden, isD
           <meshStandardMaterial
             ref={materialRef}
             map={texture}
-            roughness={isGold ? 0.15 : 0.25}
-            metalness={isGold ? 0.95 : 0.8}
+            roughness={isGold ? 0.18 : 0.25}
+            metalness={isGold ? 0.25 : 0.4} // moderate metalness exposes vibrant diffuse gold colors
             emissive={new THREE.Color(emissiveColor)}
             emissiveIntensity={emissiveIntensity}
           />
@@ -331,8 +328,8 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
           <cylinderGeometry args={[0.66, 0.66, 0.01, 64]} />
           <meshStandardMaterial
             map={textures.gold}
-            roughness={0.12}
-            metalness={0.98}
+            roughness={0.15}
+            metalness={0.25} // moderate metalness for maximum gold vibrancy
             emissive={new THREE.Color('#ffd700')}
             emissiveIntensity={gameState === 'winner_pulse' ? 2.5 : 0.5}
           />
@@ -343,8 +340,8 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
           <cylinderGeometry args={[0.66, 0.66, 0.01, 64]} />
           <meshStandardMaterial
             map={textures.darkIpad}
-            roughness={0.2}
-            metalness={0.9}
+            roughness={0.22}
+            metalness={0.3} // moderate metalness for dark copper details
             emissive={new THREE.Color('#e08833')}
             emissiveIntensity={0.4}
           />
