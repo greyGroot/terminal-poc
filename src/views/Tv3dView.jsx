@@ -72,7 +72,7 @@ const drawDarkRecord = (ctx, size) => {
   ctx.fillRect(0, 0, size, size);
   
   // 2. Grooves
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
   ctx.lineWidth = 1;
   for (let r = size * 0.18; r < size * 0.5; r += 4) {
     ctx.beginPath();
@@ -89,34 +89,34 @@ const drawDarkIpadRecord = (ctx, size) => {
   
   // 1. Conic Gradient (dark copper style)
   const conic = ctx.createConicGradient(Math.PI / 4, cx, cy);
-  conic.addColorStop(0, '#111');
-  conic.addColorStop(45/360, '#3a1a00');
-  conic.addColorStop(90/360, '#111');
-  conic.addColorStop(135/360, '#3a1a00');
-  conic.addColorStop(180/360, '#111');
-  conic.addColorStop(225/360, '#3a1a00');
-  conic.addColorStop(270/360, '#111');
-  conic.addColorStop(315/360, '#3a1a00');
-  conic.addColorStop(1, '#111');
+  conic.addColorStop(0, '#0a0a0a');
+  conic.addColorStop(45/360, '#2d1600'); // dark copper specular shine
+  conic.addColorStop(90/360, '#0a0a0a');
+  conic.addColorStop(135/360, '#2d1600');
+  conic.addColorStop(180/360, '#0a0a0a');
+  conic.addColorStop(225/360, '#2d1600');
+  conic.addColorStop(270/360, '#0a0a0a');
+  conic.addColorStop(315/360, '#2d1600');
+  conic.addColorStop(1, '#0a0a0a');
   
   ctx.fillStyle = conic;
   ctx.fillRect(0, 0, size, size);
   
-  // 2. Grooves
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+  // 2. High-definition record groove lines (visible light reflection)
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
   ctx.lineWidth = 1;
-  for (let r = size * 0.18; r < size * 0.5; r += 3) {
+  for (let r = size * 0.18; r < size * 0.5; r += 3.5) {
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.stroke();
   }
   
-  // 3. Radial Gradient overlay
+  // 3. Radial Gradient overlay for outer shine
   const radial = ctx.createRadialGradient(cx, cy, size * 0.15, cx, cy, size * 0.5);
   radial.addColorStop(0, 'rgba(0, 0, 0, 0)');
-  radial.addColorStop(0.6, 'rgba(0, 0, 0, 0)');
-  radial.addColorStop(0.95, 'rgba(0, 0, 0, 0.6)');
-  radial.addColorStop(1, 'rgba(255, 85, 0, 0.4)');
+  radial.addColorStop(0.65, 'rgba(0, 0, 0, 0)');
+  radial.addColorStop(0.92, 'rgba(0, 0, 0, 0.5)');
+  radial.addColorStop(1, 'rgba(255, 95, 0, 0.25)'); // subtle orange-copper edge
   
   ctx.fillStyle = radial;
   ctx.beginPath();
@@ -162,8 +162,8 @@ function Record3D({ index, position, gameState, isActive, isPulse, isHidden, isD
     }
 
     if (materialRef.current) {
-      // Smoothly dim opacity of non-winning records in result state
-      const targetOpacity = isDimmed ? 0.2 : 1.0;
+      // Smoothly dim opacity of non-winning records in result state (0.45 for result screen visibility, 0.2 for welcome text contrast)
+      const targetOpacity = isDimmed ? (gameState === 'name_entered' ? 0.2 : 0.45) : 1.0;
       materialRef.current.opacity = THREE.MathUtils.lerp(materialRef.current.opacity, targetOpacity, delta * 5);
       materialRef.current.transparent = materialRef.current.opacity < 1.0;
     }
@@ -208,8 +208,8 @@ function Record3D({ index, position, gameState, isActive, isPulse, isHidden, isD
           <meshStandardMaterial
             ref={materialRef}
             map={texture}
-            roughness={isGold ? 0.18 : 0.25}
-            metalness={isGold ? 0.25 : 0.4} // moderate metalness exposes vibrant diffuse gold colors
+            roughness={isGold ? 0.22 : 0.65}
+            metalness={isGold ? 0.25 : 0.1} // matte non-metallic for dark background records
             emissive={new THREE.Color(emissiveColor)}
             emissiveIntensity={emissiveIntensity}
           />
@@ -335,21 +335,21 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
           />
         </mesh>
 
-        {/* Back Face (Dark iPad Vinyl) */}
+        {/* Back Face (Black Vinyl) */}
         <mesh position={[0, 0, -0.005]} rotation={[-Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.66, 0.66, 0.01, 64]} />
           <meshStandardMaterial
-            map={textures.darkIpad}
+            map={textures.dark}
             roughness={0.22}
-            metalness={0.3} // moderate metalness for dark copper details
-            emissive={new THREE.Color('#e08833')}
-            emissiveIntensity={0.4}
+            metalness={0.3}
+            emissive={new THREE.Color('#000000')}
+            emissiveIntensity={0.0}
           />
         </mesh>
       </group>
 
       {/* Non-spinning, flipping HTML Result Container */}
-      <group rotation={[0, Math.PI, 0]} position={[0, 0, -0.012]} visible={showResultOverlay}>
+      <group rotation={[0, Math.PI, 0]} position={[0, 0, -0.012]} scale={[0.87, 0.87, 1]} visible={showResultOverlay}>
         <Html
           transform
           occlude
@@ -362,7 +362,9 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            background: 'radial-gradient(circle, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.65) 55%, rgba(0,0,0,0) 85%)',
+            background: 'transparent',
+            border: '2.5px solid rgba(255, 95, 0, 0.95)', // Bright Mastercard Orange neon ring core
+            boxShadow: '0 0 35px rgba(255, 95, 0, 0.9), 0 0 70px rgba(235, 0, 27, 0.55), inset 0 0 25px rgba(255, 95, 0, 0.4)', // Soft orange-red neon bloom
             overflow: 'hidden'
           }}
         >
@@ -396,9 +398,9 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
                     <span style={{ color: 'var(--mc-orange)', fontSize: '0.9rem', fontWeight: 'bold' }}>PRIZE IMAGE</span>
                   </div>
                   
-                  <h2 style={{ fontSize: '1.4rem', fontWeight: 400, lineHeight: 1.25, margin: 0 }}>
+                  <h2 style={{ fontSize: '1.4rem', fontWeight: 400, lineHeight: 1.25, margin: 0, textShadow: '0 2px 10px rgba(0,0,0,0.95)' }}>
                     {t('result_win_1', { name: resultData.userData.name })}<br/>{t('result_win_2')}<br/>
-                    <span style={{ color: 'var(--mc-orange)', fontWeight: 900, fontSize: '1.9rem', marginTop: '0.4rem', display: 'block', textTransform: 'uppercase', textShadow: '0 0 10px rgba(255,95,0,0.4)' }}>
+                    <span style={{ color: 'var(--mc-orange)', fontWeight: 900, fontSize: '1.9rem', marginTop: '0.4rem', display: 'block', textTransform: 'uppercase', textShadow: '0 0 15px rgba(255,95,0,0.6)' }}>
                       {lang === 'uk' ? resultData.prize.name_uk : resultData.prize.name_en}
                     </span>
                   </h2>
@@ -414,14 +416,14 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
                     <line x1="2" y1="12" x2="4" y2="12"></line>
                   </svg>
                   
-                  <h2 style={{ fontSize: '1.4rem', fontWeight: 400, lineHeight: 1.25, letterSpacing: '0.5px', margin: 0 }}>
+                  <h2 style={{ fontSize: '1.4rem', fontWeight: 400, lineHeight: 1.25, letterSpacing: '0.5px', margin: 0, textShadow: '0 2px 10px rgba(0,0,0,0.95)' }}>
                     {t('result_lose_1', { name: resultData.userData.name })}<br/>
                     {t('result_lose_2')}<br/>{t('result_lose_3')}
                   </h2>
                   
                   <div style={{ width: '30px', height: '1.5px', background: 'var(--mc-orange)', margin: '0.8rem auto' }}></div>
                   
-                  <h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--mc-orange)', maxWidth: '300px', lineHeight: 1.3, margin: 0 }}>
+                  <h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--mc-orange)', maxWidth: '300px', lineHeight: 1.3, margin: 0, textShadow: '0 2px 10px rgba(0,0,0,0.95)' }}>
                     {t(`result_no_prize_${resultData.messageIndex}`)}
                   </h3>
                 </>
@@ -456,7 +458,7 @@ function RecordsGrid3D({ gameState, activeIndices, winnerIndex, resultData, text
     const isActive = activeIndices.includes(i);
     const isPulse = gameState === 'winner_pulse' && winnerIndex === i;
     const isHidden = (gameState === 'result' || gameState === 'winner_pulse') && winnerIndex === i;
-    const isDimmed = gameState === 'result' && winnerIndex !== i;
+    const isDimmed = (gameState === 'result' && winnerIndex !== i) || gameState === 'name_entered';
 
     records.push(
       <Record3D
@@ -491,70 +493,7 @@ function RecordsGrid3D({ gameState, activeIndices, winnerIndex, resultData, text
   );
 }
 
-// Confetti Background Particles Component
-function ConfettiParticle({ initialPos }) {
-  const meshRef = useRef();
-  const speed = useMemo(() => 0.4 + Math.random() * 0.8, []);
-  const rotSpeed = useMemo(() => ({
-    x: Math.random() * 1.2,
-    y: Math.random() * 1.2,
-    z: Math.random() * 1.2
-  }), []);
-  
-  // Mastercard corporate colors: Orange, Red, Yellow, and subtle White
-  const color = useMemo(() => {
-    const colors = ['#FF5F00', '#EB001B', '#F79E1B', '#FFFFFF'];
-    return colors[Math.floor(Math.random() * colors.length)];
-  }, []);
-
-  const size = useMemo(() => 0.04 + Math.random() * 0.05, []);
-
-  useFrame((state, delta) => {
-    if (meshRef.current) {
-      // Fall down
-      meshRef.current.position.y -= delta * speed;
-      // Rotate
-      meshRef.current.rotation.x += delta * rotSpeed.x;
-      meshRef.current.rotation.y += delta * rotSpeed.y;
-      meshRef.current.rotation.z += delta * rotSpeed.z;
-
-      // Wrap around when it goes below screen (fullscreen height is approx 7 units at z=-4)
-      if (meshRef.current.position.y < -7) {
-        meshRef.current.position.y = 7;
-        meshRef.current.position.x = (Math.random() - 0.5) * 20;
-      }
-    }
-  });
-
-  return (
-    <mesh ref={meshRef} position={initialPos}>
-      <boxGeometry args={[size, size * 1.8, 0.005]} />
-      {/* Lower opacity for a subtle background effect */}
-      <meshBasicMaterial color={color} transparent opacity={0.22} depthWrite={false} />
-    </mesh>
-  );
-}
-
-function ConfettiBackground() {
-  const particles = useMemo(() => {
-    const arr = [];
-    for (let i = 0; i < 90; i++) {
-      const x = (Math.random() - 0.5) * 20; // wider range for fullscreen
-      const y = (Math.random() - 0.5) * 14;
-      const z = -4 - Math.random() * 5; // further back in background
-      arr.push({ id: i, pos: [x, y, z] });
-    }
-    return arr;
-  }, []);
-
-  return (
-    <group>
-      {particles.map((p) => (
-        <ConfettiParticle key={p.id} initialPos={p.pos} />
-      ))}
-    </group>
-  );
-}
+// Confetti removed by user request
 
 export default function Tv3dView() {
   const [state, setState] = useState('idle'); // idle, name_entered, roulette, winner_pulse, result
@@ -699,13 +638,6 @@ export default function Tv3dView() {
 
   return (
     <div className="fullscreen-view" onClick={enableFullscreen} style={{ cursor: 'pointer', position: 'relative', justifyContent: 'flex-start', overflow: 'hidden' }}>
-      
-      {/* Absolute Fullscreen 3D Canvas for Background Confetti */}
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, pointerEvents: 'none' }}>
-        <Canvas>
-          <ConfettiBackground />
-        </Canvas>
-      </div>
 
       {/* Header */}
       {renderHeader()}
@@ -726,21 +658,21 @@ export default function Tv3dView() {
       <div style={{ 
         flex: 1, 
         width: '100%', 
-        position: 'relative', 
+        position: 'relative',
         zIndex: 5, 
         outline: 'none', 
         marginBottom: '6rem'
       }}>
         <Canvas camera={{ position: [0, 0, 13], fov: 28 }}>
-          <ambientLight intensity={0.7} />
-          {/* Warm metallic studio point lights to emphasize Gold and Copper */}
-          <pointLight position={[0, 4, 6]} intensity={1.5} color="#ffffff" />
+          <ambientLight intensity={0.7} color="#fff5ea" />
+          {/* Warm metallic point lights to emphasize Gold and Copper */}
+          <pointLight position={[0, 4, 6]} intensity={1.5} color="#ffbb44" />
           <pointLight position={[-6, 6, 4]} intensity={2.5} color="#d4af37" /> {/* Warm Metallic Gold */}
           <pointLight position={[6, -6, 4]} intensity={2.0} color="#ffaa44" />  {/* Warm Metallic Copper-Orange */}
           <pointLight position={[0, 0, 3]} intensity={2.0} color="#e5983b" />   {/* Soft copper highlight in center */}
           
-          {/* Environment preset for ultra premium shiny metallic gold/copper reflections */}
-          <Environment preset="studio" />
+          {/* Warm sunset environment for realistic golden/copper reflections without cold white glares */}
+          <Environment preset="sunset" />
           
           <RecordsGrid3D
             gameState={state}
@@ -759,15 +691,31 @@ export default function Tv3dView() {
 
       {/* Welcome Screen Overlay */}
       {state === 'name_entered' && (
-        <div className="tv-overlay fade-in">
-          <h1 style={{ fontSize: '6rem', color: '#fff', fontWeight: 900, textShadow: '0 0 40px #000', fontFamily: 'Outfit', lineHeight: 1.2 }}>
-            {t('tv_welcome_1', { name: playerName }).split('\n')[0]}<br/>
-            {t('tv_welcome_1', { name: playerName }).split('\n')[1]}<br/>
-            <span style={{ color: 'var(--mc-orange)' }}>{t('tv_welcome_1_highlight')}</span>
-          </h1>
-          <h2 style={{ fontSize: '3rem', marginTop: '2rem', color: '#fff', textShadow: '0 0 20px #000', fontFamily: 'Outfit' }}>
-            {t('tv_welcome_2')}
-          </h2>
+        <div className="tv-overlay fade-in" style={{ zIndex: 30 }}>
+          <div style={{
+            background: 'rgba(0, 0, 0, 0.85)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            padding: '4rem 6rem',
+            borderRadius: '32px',
+            border: '2px solid rgba(255, 95, 0, 0.35)',
+            boxShadow: '0 30px 80px rgba(0, 0, 0, 0.95), 0 0 50px rgba(255, 95, 0, 0.25)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            maxWidth: '85%',
+            textAlign: 'center'
+          }}>
+            <h1 style={{ fontSize: '6rem', color: '#fff', fontWeight: 900, fontFamily: 'Outfit', lineHeight: 1.2, margin: 0, textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+              {t('tv_welcome_1', { name: playerName }).split('\n')[0]}<br/>
+              {t('tv_welcome_1', { name: playerName }).split('\n')[1]}<br/>
+              <span style={{ color: 'var(--mc-orange)', textShadow: '0 0 20px rgba(255, 95, 0, 0.4)' }}>{t('tv_welcome_1_highlight')}</span>
+            </h1>
+            <h2 style={{ fontSize: '3rem', marginTop: '2.5rem', color: 'rgba(255, 255, 255, 0.9)', fontFamily: 'Outfit', fontWeight: 500, margin: '2.5rem 0 0 0' }}>
+              {t('tv_welcome_2')}
+            </h2>
+          </div>
         </div>
       )}
 
@@ -780,10 +728,9 @@ export default function Tv3dView() {
         </div>
       )}
 
-      {/* Winner Result Overlay (Title & Confetti) */}
+      {/* Winner Result Overlay (Title) */}
       {state === 'result' && resultData && (
         <>
-          <div className="confetti fade-in"></div>
           {/* Dimmer background overlay (text is high contrast) */}
           <div className="tv-overlay fade-in" style={{ backgroundColor: 'rgba(0,0,0,0.5)', pointerEvents: 'none', zIndex: 1 }} />
           
