@@ -348,12 +348,12 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
       const targetY = -0.06 / gridScale;
       groupRef.current.position.y = THREE.MathUtils.lerp(gridPosition.y, targetY, tVal);
       
-      // Keep absolute Z position stable at 0.69
-      const targetZ = 0.69 / gridScale;
+      // Keep absolute Z position stable at 0.9
+      const targetZ = 0.9 / gridScale;
       groupRef.current.position.z = THREE.MathUtils.lerp(gridPosition.z, targetZ, tVal);
 
-      // Interpolate scale to desired absolute scale of 0.93
-      const targetScale = 0.93 / gridScale;
+      // Interpolate scale to desired absolute scale of 1.8
+      const targetScale = 1.8 / gridScale;
       const currentScale = THREE.MathUtils.lerp(1.0, targetScale, tVal);
       groupRef.current.scale.set(currentScale, currentScale, currentScale);
 
