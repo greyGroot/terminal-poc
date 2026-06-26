@@ -28,14 +28,35 @@ const drawGoldRecord = (ctx, size) => {
   ctx.fillStyle = conic;
   ctx.fillRect(0, 0, size, size);
   
-  // 2. High-definition record groove lines
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
-  ctx.lineWidth = 1;
-  for (let r = size * 0.18; r < size * 0.5; r += 3.5) {
+  // 2. Draw Recording Tracks with dense groove lines and Gap Bands
+  const drawTrackGrooves = (startR, endR) => {
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.28)';
+    ctx.lineWidth = 1;
+    for (let r = startR; r < endR; r += 2) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  };
+
+  const drawGapBand = (startR, endR) => {
+    // Make the gap between songs slightly darker and smoother (no grooves)
+    const grad = ctx.createRadialGradient(cx, cy, startR, cx, cy, endR);
+    grad.addColorStop(0, 'rgba(0, 0, 0, 0.15)');
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0.25)');
+    ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.stroke();
-  }
+    ctx.arc(cx, cy, endR, 0, Math.PI * 2);
+    ctx.arc(cx, cy, startR, 0, Math.PI * 2, true);
+    ctx.fill();
+  };
+
+  // Draw 3 distinct song tracks and 2 smooth gap bands
+  drawTrackGrooves(size * 0.20, size * 0.29);
+  drawGapBand(size * 0.29, size * 0.31);
+  drawTrackGrooves(size * 0.31, size * 0.40);
+  drawGapBand(size * 0.40, size * 0.42);
+  drawTrackGrooves(size * 0.42, size * 0.49);
   
   // 3. Radial Gradient overlay for glowing orange-copper outer edge
   const radial = ctx.createRadialGradient(cx, cy, size * 0.15, cx, cy, size * 0.5);
@@ -71,14 +92,35 @@ const drawDarkRecord = (ctx, size) => {
   ctx.fillStyle = conic;
   ctx.fillRect(0, 0, size, size);
   
-  // 2. Grooves
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-  ctx.lineWidth = 1;
-  for (let r = size * 0.18; r < size * 0.5; r += 4) {
+  // 2. Draw Recording Tracks with dense groove lines and Gap Bands
+  const drawTrackGrooves = (startR, endR) => {
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)'; // visible white highlights!
+    ctx.lineWidth = 1;
+    for (let r = startR; r < endR; r += 2.5) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  };
+
+  const drawGapBand = (startR, endR) => {
+    // Gaps between tracks are darker black
+    const grad = ctx.createRadialGradient(cx, cy, startR, cx, cy, endR);
+    grad.addColorStop(0, 'rgba(0, 0, 0, 0.45)');
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0.6)');
+    ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.stroke();
-  }
+    ctx.arc(cx, cy, endR, 0, Math.PI * 2);
+    ctx.arc(cx, cy, startR, 0, Math.PI * 2, true);
+    ctx.fill();
+  };
+
+  // Draw 3 tracks and 2 gaps
+  drawTrackGrooves(size * 0.20, size * 0.29);
+  drawGapBand(size * 0.29, size * 0.31);
+  drawTrackGrooves(size * 0.31, size * 0.40);
+  drawGapBand(size * 0.40, size * 0.42);
+  drawTrackGrooves(size * 0.42, size * 0.49);
 
   drawCenterHole(ctx, size);
 };
@@ -155,20 +197,27 @@ const drawBumpMap = (ctx, size) => {
   ctx.fillStyle = '#808080';
   ctx.fillRect(0, 0, size, size);
   
-  // Draw Concentric ridges (alternating black and white heights)
-  for (let r = size * 0.18; r < size * 0.5; r += 3) {
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 1.0;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.stroke();
+  // Draw Concentric ridges only in track areas (leaving gaps smooth)
+  const drawTrackBump = (startR, endR) => {
+    for (let r = startR; r < endR; r += 2.5) {
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
 
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.0;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r + 1.5, 0, Math.PI * 2);
-    ctx.stroke();
-  }
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r + 1.25, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  };
+
+  // Apply bump map to the 3 tracks
+  drawTrackBump(size * 0.20, size * 0.29);
+  drawTrackBump(size * 0.31, size * 0.40);
+  drawTrackBump(size * 0.42, size * 0.49);
 };
 
 // 3D Record in the grid
@@ -233,7 +282,7 @@ function Record3D({ index, position, gameState, isActive, isPulse, isHidden, isD
             ref={materialRef}
             map={texture}
             bumpMap={textures.bump}
-            bumpScale={0.008}
+            bumpScale={0.025}
             roughness={isGold ? 0.22 : 0.65}
             metalness={isGold ? 0.25 : 0.1} // matte non-metallic for dark background records
             emissive={new THREE.Color(emissiveColor)}
@@ -355,7 +404,7 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
           <meshStandardMaterial
             map={textures.gold}
             bumpMap={textures.bump}
-            bumpScale={0.008}
+            bumpScale={0.025}
             roughness={0.15}
             metalness={0.25} // moderate metalness for maximum gold vibrancy
             emissive={new THREE.Color('#ffd700')}
@@ -369,7 +418,7 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
           <meshStandardMaterial
             map={textures.dark}
             bumpMap={textures.bump}
-            bumpScale={0.008}
+            bumpScale={0.025}
             roughness={0.22}
             metalness={0.3}
             emissive={new THREE.Color('#000000')}
