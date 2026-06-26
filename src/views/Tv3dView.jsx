@@ -688,6 +688,13 @@ export default function Tv3dView() {
   return (
     <div className="fullscreen-view" onClick={enableFullscreen} style={{ cursor: 'pointer', position: 'relative', justifyContent: 'flex-start', overflow: 'hidden' }}>
       
+      {/* Absolute Fullscreen 3D Canvas for Background Confetti */}
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, pointerEvents: 'none' }}>
+        <Canvas>
+          <ConfettiBackground />
+        </Canvas>
+      </div>
+
       {/* Header */}
       {renderHeader()}
 
@@ -705,14 +712,12 @@ export default function Tv3dView() {
 
       {/* Grid container overlaying the 3D Canvas */}
       <div style={{ 
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: 5,
-        outline: 'none',
-        pointerEvents: 'none'
+        flex: 1, 
+        width: '100%', 
+        position: 'relative', 
+        zIndex: 5, 
+        outline: 'none', 
+        marginBottom: '6rem'
       }}>
         <Canvas camera={{ position: [0, 0, 13], fov: 28 }}>
           <ambientLight intensity={0.7} />
@@ -721,9 +726,6 @@ export default function Tv3dView() {
           <pointLight position={[-6, 6, 4]} intensity={3.0} color="#ff0055" /> {/* Neon Pink */}
           <pointLight position={[6, -6, 4]} intensity={3.0} color="#00aaff" />  {/* Neon Cyan */}
           <pointLight position={[0, 0, 3]} intensity={4.0} color="#ff5500" />   {/* Neon Orange aura in center */}
-          
-          {/* Confetti Background in 3D */}
-          <ConfettiBackground />
           
           <RecordsGrid3D
             gameState={state}
@@ -736,9 +738,6 @@ export default function Tv3dView() {
           />
         </Canvas>
       </div>
-
-      {/* Spacer to push footer down and preserve page flow */}
-      <div style={{ flex: 1 }} />
 
       {/* Footer */}
       {renderFooter()}
