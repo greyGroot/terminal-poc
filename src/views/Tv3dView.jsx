@@ -295,7 +295,7 @@ function Record3D({ index, position, gameState, isActive, isPulse, isHidden, isD
 }
 
 // Detached winning record with fly & flip & result rendering
-function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t }) {
+function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t, gridScale, yCenter }) {
   const groupRef = useRef();
   const vinylGroupRef = useRef();
   const ringRef = useRef();
@@ -343,17 +343,24 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
 
       // Interpolate position to center
       groupRef.current.position.x = THREE.MathUtils.lerp(gridPosition.x, 0, tVal);
-      groupRef.current.position.y = THREE.MathUtils.lerp(gridPosition.y, -0.2, tVal);
-      groupRef.current.position.z = THREE.MathUtils.lerp(gridPosition.z, 2.3, tVal);
+      
+      // Keep absolute Y position stable at yCenter - 0.06
+      const targetY = -0.06 / gridScale;
+      groupRef.current.position.y = THREE.MathUtils.lerp(gridPosition.y, targetY, tVal);
+      
+      // Keep absolute Z position stable at 0.69
+      const targetZ = 0.69 / gridScale;
+      groupRef.current.position.z = THREE.MathUtils.lerp(gridPosition.z, targetZ, tVal);
 
-      // Interpolate scale (approx 3.1x size)
-      const currentScale = THREE.MathUtils.lerp(1.0, 3.1, tVal);
+      // Interpolate scale to desired absolute scale of 0.93
+      const targetScale = 0.93 / gridScale;
+      const currentScale = THREE.MathUtils.lerp(1.0, targetScale, tVal);
       groupRef.current.scale.set(currentScale, currentScale, currentScale);
 
       // Interpolate Y rotation (horizontal flip)
       // Transition from initial angle to nearest odd multiple of Math.PI to show backside
-      const targetY = initialYRotationRef.current > Math.PI ? Math.PI * 3 : Math.PI;
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(initialYRotationRef.current, targetY, tVal);
+      const targetYRotation = initialYRotationRef.current > Math.PI ? Math.PI * 3 : Math.PI;
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(initialYRotationRef.current, targetYRotation, tVal);
 
       // Spin the vinyl itself
       if (vinylGroupRef.current) {
@@ -516,12 +523,11 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
 }
 
 // Grid Container to handle viewport calculations and rendering all records
-function RecordsGrid3D({ gameState, activeIndices, winnerIndex, resultData, textures, lang, t }) {
-  const { width, height } = useThree((state) => state.viewport);
+function RecordsGrid3D({ gameState, activeIndices, winnerIndex, resultData, textures, lang, t, availableHeightUnits, yCenter }) {
+  const { width } = useThree((state) => state.viewport);
   
-  // Calculate responsive spacing and scale, reserving space for header and footer
-  const restrictedHeight = height - 3.8;
-  const gridScale = Math.min(width / 8.8, restrictedHeight / 8.8);
+  // Calculate responsive spacing and scale, reserving space for header and footer dynamically
+  const gridScale = Math.min((availableHeightUnits * 0.95) / 7.72, (width * 0.95) / 7.72);
   const spacing = 1.6;
 
   // Grid coordinates mapping
@@ -559,7 +565,7 @@ function RecordsGrid3D({ gameState, activeIndices, winnerIndex, resultData, text
   const winnerPosition = winnerIndex >= 0 ? getGridPosition(winnerIndex) : new THREE.Vector3(0, 0, 0);
 
   return (
-    <group scale={[gridScale, gridScale, 1]} position={[0, -0.4, 0]}>
+    <group scale={[gridScale, gridScale, 1]} position={[0, yCenter, 0]}>
       {records}
       <WinnerRecord3D
         gridPosition={winnerPosition}
@@ -568,6 +574,8 @@ function RecordsGrid3D({ gameState, activeIndices, winnerIndex, resultData, text
         textures={textures}
         lang={lang}
         t={t}
+        gridScale={gridScale}
+        yCenter={yCenter}
       />
     </group>
   );
@@ -661,6 +669,47 @@ export default function Tv3dView() {
   const { t, lang, setLang } = useLanguage();
   const intervalRef = useRef(null);
   const targetIdxRef = useRef(-1);
+
+  const topRef = useRef(null);
+  const bottomRef = useRef(null);
+  const [layoutMetrics, setLayoutMetrics] = useState({
+    availableHeightUnits: 3.8,
+    yCenter: -0.4
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (topRef.current && bottomRef.current) {
+        const topRect = topRef.current.getBoundingClientRect();
+        const bottomRect = bottomRef.current.getBoundingClientRect();
+        const winHeight = window.innerHeight;
+        
+        const fov = 28;
+        const cameraZ = 13;
+        const vHeight = 2 * Math.tan((fov * Math.PI) / 360) * cameraZ;
+        
+        const available_px = bottomRect.top - topRect.bottom;
+        const center_y_px = topRect.bottom + available_px / 2;
+        const center_y_rel_px = (winHeight / 2) - center_y_px;
+        
+        const availableHeightUnits = available_px * (vHeight / winHeight);
+        const yCenter = center_y_rel_px * (vHeight / winHeight);
+        
+        setLayoutMetrics({
+          availableHeightUnits,
+          yCenter
+        });
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    const timer = setTimeout(handleResize, 400);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timer);
+    };
+  }, []);
 
   // Load and cache high fidelity canvas textures
   const textures = useMemo(() => {
@@ -794,7 +843,7 @@ export default function Tv3dView() {
   );
 
   const renderFooter = () => (
-    <div className="fade-in" style={{ position: 'absolute', bottom: '2rem', left: '0', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', zIndex: 20 }}>
+    <div ref={bottomRef} className="fade-in" style={{ position: 'absolute', bottom: '2rem', left: '0', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', zIndex: 20 }}>
       {state !== 'result' && (
         <span style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.7)', letterSpacing: '2px', textTransform: 'uppercase' }}>
           {t('tv_footer')}
@@ -807,12 +856,18 @@ export default function Tv3dView() {
   return (
     <div className="fullscreen-view" onClick={enableFullscreen} style={{ cursor: 'pointer', position: 'relative', justifyContent: 'flex-start', overflow: 'hidden' }}>
 
-      {/* Header */}
-      {renderHeader()}
+      {/* Header and Title Area */}
+      <div ref={topRef} style={{ width: '100%', zIndex: 20, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {renderHeader()}
 
-      {/* Screen Title (Idle State) */}
-      {state === 'idle' && (
-        <div className="fade-in" style={{ textAlign: 'center', marginBottom: '2.5rem', zIndex: 20 }}>
+        {/* Screen Title (Stable Height Container) */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '2.5rem',
+          opacity: state === 'idle' ? 1 : 0,
+          visibility: state === 'idle' ? 'visible' : 'hidden',
+          transition: 'opacity 0.4s ease, visibility 0.4s'
+        }}>
           <h1 style={{ fontSize: '5rem', color: '#fff', fontWeight: 900, marginBottom: '0.5rem', letterSpacing: '4px', fontFamily: 'Outfit' }}>
             {t('tv_main_title_1')}
           </h1>
@@ -820,7 +875,7 @@ export default function Tv3dView() {
             {t('tv_main_title_2')}
           </h1>
         </div>
-      )}
+      </div>
 
       {/* Fullscreen 3D Canvas containing both the parallax background and the records grid */}
       <div style={{ 
@@ -857,6 +912,8 @@ export default function Tv3dView() {
             textures={textures}
             lang={lang}
             t={t}
+            availableHeightUnits={layoutMetrics.availableHeightUnits}
+            yCenter={layoutMetrics.yCenter}
           />
         </Canvas>
       </div>
