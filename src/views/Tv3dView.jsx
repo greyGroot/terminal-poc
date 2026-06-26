@@ -519,8 +519,9 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
 function RecordsGrid3D({ gameState, activeIndices, winnerIndex, resultData, textures, lang, t }) {
   const { width, height } = useThree((state) => state.viewport);
   
-  // Calculate responsive spacing and scale
-  const gridScale = Math.min(width / 8.8, height / 8.8);
+  // Calculate responsive spacing and scale, reserving space for header and footer
+  const restrictedHeight = height - 3.8;
+  const gridScale = Math.min(width / 8.8, restrictedHeight / 8.8);
   const spacing = 1.6;
 
   // Grid coordinates mapping
@@ -558,7 +559,7 @@ function RecordsGrid3D({ gameState, activeIndices, winnerIndex, resultData, text
   const winnerPosition = winnerIndex >= 0 ? getGridPosition(winnerIndex) : new THREE.Vector3(0, 0, 0);
 
   return (
-    <group scale={[gridScale, gridScale, 1]}>
+    <group scale={[gridScale, gridScale, 1]} position={[0, -0.4, 0]}>
       {records}
       <WinnerRecord3D
         gridPosition={winnerPosition}
@@ -821,14 +822,15 @@ export default function Tv3dView() {
         </div>
       )}
 
-      {/* Grid container overlaying the 3D Canvas */}
+      {/* Fullscreen 3D Canvas containing both the parallax background and the records grid */}
       <div style={{ 
-        flex: 1, 
-        width: '100%', 
-        position: 'relative',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
         zIndex: 5, 
-        outline: 'none', 
-        marginBottom: '6rem'
+        outline: 'none'
       }}>
         <Canvas camera={{ position: [0, 0, 13], fov: 28 }}>
           <ambientLight intensity={0.7} color="#fff5ea" />
