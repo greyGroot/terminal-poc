@@ -482,19 +482,20 @@ function RecordsGrid3D({ gameState, activeIndices, winnerIndex, resultData, text
 // Confetti Background Particles Component
 function ConfettiParticle({ initialPos }) {
   const meshRef = useRef();
-  const speed = useMemo(() => 0.6 + Math.random() * 1.2, []);
+  const speed = useMemo(() => 0.4 + Math.random() * 0.8, []);
   const rotSpeed = useMemo(() => ({
-    x: Math.random() * 1.5,
-    y: Math.random() * 1.5,
-    z: Math.random() * 1.5
+    x: Math.random() * 1.2,
+    y: Math.random() * 1.2,
+    z: Math.random() * 1.2
   }), []);
   
+  // Mastercard corporate colors: Orange, Red, Yellow, and subtle White
   const color = useMemo(() => {
-    const colors = ['#ff5500', '#eb001b', '#ffcc66', '#ff007f', '#ffffff', '#00aaff'];
+    const colors = ['#FF5F00', '#EB001B', '#F79E1B', '#FFFFFF'];
     return colors[Math.floor(Math.random() * colors.length)];
   }, []);
 
-  const size = useMemo(() => 0.05 + Math.random() * 0.07, []);
+  const size = useMemo(() => 0.04 + Math.random() * 0.05, []);
 
   useFrame((state, delta) => {
     if (meshRef.current) {
@@ -505,10 +506,10 @@ function ConfettiParticle({ initialPos }) {
       meshRef.current.rotation.y += delta * rotSpeed.y;
       meshRef.current.rotation.z += delta * rotSpeed.z;
 
-      // Wrap around when it goes below screen (approx viewport height boundary)
-      if (meshRef.current.position.y < -6) {
-        meshRef.current.position.y = 6;
-        meshRef.current.position.x = (Math.random() - 0.5) * 12;
+      // Wrap around when it goes below screen (fullscreen height is approx 7 units at z=-4)
+      if (meshRef.current.position.y < -7) {
+        meshRef.current.position.y = 7;
+        meshRef.current.position.x = (Math.random() - 0.5) * 20;
       }
     }
   });
@@ -516,7 +517,8 @@ function ConfettiParticle({ initialPos }) {
   return (
     <mesh ref={meshRef} position={initialPos}>
       <boxGeometry args={[size, size * 1.8, 0.005]} />
-      <meshBasicMaterial color={color} transparent opacity={0.65} />
+      {/* Lower opacity for a subtle background effect */}
+      <meshBasicMaterial color={color} transparent opacity={0.22} depthWrite={false} />
     </mesh>
   );
 }
@@ -524,10 +526,10 @@ function ConfettiParticle({ initialPos }) {
 function ConfettiBackground() {
   const particles = useMemo(() => {
     const arr = [];
-    for (let i = 0; i < 75; i++) {
-      const x = (Math.random() - 0.5) * 12;
-      const y = (Math.random() - 0.5) * 12;
-      const z = -3 - Math.random() * 4; // placed in the background behind grid
+    for (let i = 0; i < 90; i++) {
+      const x = (Math.random() - 0.5) * 20; // wider range for fullscreen
+      const y = (Math.random() - 0.5) * 14;
+      const z = -4 - Math.random() * 5; // further back in background
       arr.push({ id: i, pos: [x, y, z] });
     }
     return arr;
@@ -703,12 +705,14 @@ export default function Tv3dView() {
 
       {/* Grid container overlaying the 3D Canvas */}
       <div style={{ 
-        flex: 1, 
-        width: '100%', 
-        position: 'relative', 
-        zIndex: 5, 
-        outline: 'none', 
-        marginBottom: '6rem'
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 5,
+        outline: 'none',
+        pointerEvents: 'none'
       }}>
         <Canvas camera={{ position: [0, 0, 13], fov: 28 }}>
           <ambientLight intensity={0.7} />
@@ -732,6 +736,9 @@ export default function Tv3dView() {
           />
         </Canvas>
       </div>
+
+      {/* Spacer to push footer down and preserve page flow */}
+      <div style={{ flex: 1 }} />
 
       {/* Footer */}
       {renderFooter()}
