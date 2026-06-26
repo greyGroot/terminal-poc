@@ -147,6 +147,30 @@ const drawCenterHole = (ctx, size) => {
   ctx.stroke();
 };
 
+const drawBumpMap = (ctx, size) => {
+  const cx = size / 2;
+  const cy = size / 2;
+  
+  // Fill background with neutral gray
+  ctx.fillStyle = '#808080';
+  ctx.fillRect(0, 0, size, size);
+  
+  // Draw Concentric ridges (alternating black and white heights)
+  for (let r = size * 0.18; r < size * 0.5; r += 3) {
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r + 1.5, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+};
+
 // 3D Record in the grid
 function Record3D({ index, position, gameState, isActive, isPulse, isHidden, isDimmed, textures }) {
   const meshRef = useRef();
@@ -208,6 +232,8 @@ function Record3D({ index, position, gameState, isActive, isPulse, isHidden, isD
           <meshStandardMaterial
             ref={materialRef}
             map={texture}
+            bumpMap={textures.bump}
+            bumpScale={0.008}
             roughness={isGold ? 0.22 : 0.65}
             metalness={isGold ? 0.25 : 0.1} // matte non-metallic for dark background records
             emissive={new THREE.Color(emissiveColor)}
@@ -328,6 +354,8 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
           <cylinderGeometry args={[0.66, 0.66, 0.02, 64]} />
           <meshStandardMaterial
             map={textures.gold}
+            bumpMap={textures.bump}
+            bumpScale={0.008}
             roughness={0.15}
             metalness={0.25} // moderate metalness for maximum gold vibrancy
             emissive={new THREE.Color('#ffd700')}
@@ -340,6 +368,8 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
           <cylinderGeometry args={[0.66, 0.66, 0.02, 64]} />
           <meshStandardMaterial
             map={textures.dark}
+            bumpMap={textures.bump}
+            bumpScale={0.008}
             roughness={0.22}
             metalness={0.3}
             emissive={new THREE.Color('#000000')}
@@ -518,10 +548,21 @@ export default function Tv3dView() {
       return texture;
     };
     
+    const createBumpTexture = (drawFn) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      drawFn(ctx, 512);
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.colorSpace = THREE.NoColorSpace; // Data texture, keep linear
+      return texture;
+    };
+    
     return {
       gold: createTexture(drawGoldRecord),
       dark: createTexture(drawDarkRecord),
-      darkIpad: createTexture(drawDarkIpadRecord)
+      bump: createBumpTexture(drawBumpMap)
     };
   }, []);
 
