@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Html } from '@react-three/drei';
+import { Html, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import { io } from 'socket.io-client';
 import { useLanguage } from '../i18n';
@@ -184,15 +184,19 @@ function Record3D({ index, position, gameState, isActive, isPulse, isHidden, isD
     }
   });
 
-  const texture = (gameState === 'idle' || gameState === 'name_entered' || isActive || isPulse) 
-    ? textures.gold 
-    : textures.dark;
+  const isGold = (gameState === 'idle' || gameState === 'name_entered' || isActive || isPulse);
+  const texture = isGold ? textures.gold : textures.dark;
 
-  const emissiveColor = (isPulse || isActive) ? '#ff5500' : '#000000';
-  const emissiveIntensity = isPulse ? 1.5 : (isActive ? 0.8 : 0.0);
+  const emissiveColor = isGold ? '#ff3300' : '#221100';
+  const emissiveIntensity = isPulse ? 2.5 : (isActive ? 1.5 : (isGold ? 0.25 : 0.05));
 
   return (
     <group position={position} visible={!isHidden}>
+      {/* Local neon point light inside grid records when active or pulsing */}
+      {(isActive || isPulse) && (
+        <pointLight position={[0, 0, 0.45]} intensity={3.0} distance={1.8} color="#ff5500" />
+      )}
+
       <group ref={spinGroupRef}>
         {/* Glowing border ring */}
         <mesh ref={ringRef} position={[0, 0, -0.015]}>
@@ -206,8 +210,8 @@ function Record3D({ index, position, gameState, isActive, isPulse, isHidden, isD
           <meshStandardMaterial
             ref={materialRef}
             map={texture}
-            roughness={0.9}
-            metalness={0.0}
+            roughness={isGold ? 0.15 : 0.25}
+            metalness={isGold ? 0.95 : 0.8}
             emissive={new THREE.Color(emissiveColor)}
             emissiveIntensity={emissiveIntensity}
           />
@@ -303,6 +307,16 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
 
   return (
     <group ref={groupRef} visible={isVisible}>
+      {/* Majestic neon point light attached to the winning record */}
+      {isVisible && (
+        <pointLight 
+          position={[0, 0, 0.65]} 
+          intensity={gameState === 'result' ? 5.0 : 3.0} 
+          distance={gameState === 'result' ? 5.5 : 2.0} 
+          color="#ff5500" 
+        />
+      )}
+
       {/* Outer Glow Aura Ring */}
       <mesh ref={ringRef} position={[0, 0, -0.015]}>
         <ringGeometry args={[0.67, 0.72, 64]} />
@@ -316,10 +330,10 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
           <cylinderGeometry args={[0.66, 0.66, 0.01, 64]} />
           <meshStandardMaterial
             map={textures.gold}
-            roughness={0.9}
-            metalness={0.0}
-            emissive={new THREE.Color('#ff5500')}
-            emissiveIntensity={gameState === 'winner_pulse' ? 1.5 : 0.4}
+            roughness={0.12}
+            metalness={0.98}
+            emissive={new THREE.Color('#ff3300')}
+            emissiveIntensity={gameState === 'winner_pulse' ? 2.5 : 0.5}
           />
         </mesh>
 
@@ -328,10 +342,10 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
           <cylinderGeometry args={[0.66, 0.66, 0.01, 64]} />
           <meshStandardMaterial
             map={textures.darkIpad}
-            roughness={0.9}
-            metalness={0.0}
-            emissive={new THREE.Color('#ff5500')}
-            emissiveIntensity={0.6}
+            roughness={0.2}
+            metalness={0.9}
+            emissive={new THREE.Color('#ff2200')}
+            emissiveIntensity={0.4}
           />
         </mesh>
       </group>
@@ -726,6 +740,9 @@ export default function Tv3dView() {
           <pointLight position={[-6, 6, 4]} intensity={3.0} color="#ff0055" /> {/* Neon Pink */}
           <pointLight position={[6, -6, 4]} intensity={3.0} color="#00aaff" />  {/* Neon Cyan */}
           <pointLight position={[0, 0, 3]} intensity={4.0} color="#ff5500" />   {/* Neon Orange aura in center */}
+          
+          {/* Environment preset for ultra premium shiny metallic gold/copper reflections */}
+          <Environment preset="studio" />
           
           <RecordsGrid3D
             gameState={state}
