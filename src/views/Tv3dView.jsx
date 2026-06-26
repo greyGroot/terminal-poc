@@ -344,8 +344,8 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
       // Interpolate position to center
       groupRef.current.position.x = THREE.MathUtils.lerp(gridPosition.x, 0, tVal);
       
-      // Keep absolute Y position stable at yCenter (perfectly centered in the clear space)
-      const targetY = 0;
+      // Keep absolute Y position stable at -0.15 (perfectly centered vertically between title and footer logo)
+      const targetY = (-0.15 - yCenter) / gridScale;
       groupRef.current.position.y = THREE.MathUtils.lerp(gridPosition.y, targetY, tVal);
       
       // Keep absolute Z position stable at 0.9
