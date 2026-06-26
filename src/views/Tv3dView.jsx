@@ -187,21 +187,22 @@ function Record3D({ index, position, gameState, isActive, isPulse, isHidden, isD
   const isGold = (gameState === 'idle' || gameState === 'name_entered' || isActive || isPulse);
   const texture = isGold ? textures.gold : textures.dark;
 
-  const emissiveColor = isGold ? '#ff3300' : '#221100';
-  const emissiveIntensity = isPulse ? 2.5 : (isActive ? 1.5 : (isGold ? 0.25 : 0.05));
+  // Golden-copper emissive color mapping (avoiding neon red)
+  const emissiveColor = isPulse ? '#ffd700' : (isActive ? '#ffbb44' : (isGold ? '#b87333' : '#110c05'));
+  const emissiveIntensity = isPulse ? 2.5 : (isActive ? 1.5 : (isGold ? 0.35 : 0.05));
 
   return (
     <group position={position} visible={!isHidden}>
-      {/* Local neon point light inside grid records when active or pulsing */}
+      {/* Local warm gold point light inside grid records when active or pulsing */}
       {(isActive || isPulse) && (
-        <pointLight position={[0, 0, 0.45]} intensity={3.0} distance={1.8} color="#ff5500" />
+        <pointLight position={[0, 0, 0.45]} intensity={3.0} distance={1.8} color="#ffbb44" />
       )}
 
       <group ref={spinGroupRef}>
         {/* Glowing border ring */}
         <mesh ref={ringRef} position={[0, 0, -0.015]}>
           <ringGeometry args={[0.67, 0.7, 64]} />
-          <meshBasicMaterial color="#ff5500" transparent opacity={0.3} depthWrite={false} />
+          <meshBasicMaterial color="#ffbb44" transparent opacity={0.3} depthWrite={false} />
         </mesh>
 
         {/* Record Cylinder (rotated to face camera) */}
@@ -307,20 +308,20 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
 
   return (
     <group ref={groupRef} visible={isVisible}>
-      {/* Majestic neon point light attached to the winning record */}
+      {/* Majestic warm gold point light attached to the winning record */}
       {isVisible && (
         <pointLight 
           position={[0, 0, 0.65]} 
           intensity={gameState === 'result' ? 5.0 : 3.0} 
           distance={gameState === 'result' ? 5.5 : 2.0} 
-          color="#ff5500" 
+          color="#ffaa00" 
         />
       )}
 
       {/* Outer Glow Aura Ring */}
       <mesh ref={ringRef} position={[0, 0, -0.015]}>
         <ringGeometry args={[0.67, 0.72, 64]} />
-        <meshBasicMaterial color="#ff5500" transparent opacity={0.0} depthWrite={false} />
+        <meshBasicMaterial color="#ffaa00" transparent opacity={0.0} depthWrite={false} />
       </mesh>
 
       {/* Rotating Vinyl Disc Group */}
@@ -332,7 +333,7 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
             map={textures.gold}
             roughness={0.12}
             metalness={0.98}
-            emissive={new THREE.Color('#ff3300')}
+            emissive={new THREE.Color('#ffd700')}
             emissiveIntensity={gameState === 'winner_pulse' ? 2.5 : 0.5}
           />
         </mesh>
@@ -344,7 +345,7 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
             map={textures.darkIpad}
             roughness={0.2}
             metalness={0.9}
-            emissive={new THREE.Color('#ff2200')}
+            emissive={new THREE.Color('#e08833')}
             emissiveIntensity={0.4}
           />
         </mesh>
@@ -735,11 +736,11 @@ export default function Tv3dView() {
       }}>
         <Canvas camera={{ position: [0, 0, 13], fov: 28 }}>
           <ambientLight intensity={0.7} />
-          {/* Neon Point Lights for beautiful cyber reflections */}
+          {/* Warm metallic studio point lights to emphasize Gold and Copper */}
           <pointLight position={[0, 4, 6]} intensity={1.5} color="#ffffff" />
-          <pointLight position={[-6, 6, 4]} intensity={3.0} color="#ff0055" /> {/* Neon Pink */}
-          <pointLight position={[6, -6, 4]} intensity={3.0} color="#00aaff" />  {/* Neon Cyan */}
-          <pointLight position={[0, 0, 3]} intensity={4.0} color="#ff5500" />   {/* Neon Orange aura in center */}
+          <pointLight position={[-6, 6, 4]} intensity={2.5} color="#d4af37" /> {/* Warm Metallic Gold */}
+          <pointLight position={[6, -6, 4]} intensity={2.0} color="#ffaa44" />  {/* Warm Metallic Copper-Orange */}
+          <pointLight position={[0, 0, 3]} intensity={2.0} color="#e5983b" />   {/* Soft copper highlight in center */}
           
           {/* Environment preset for ultra premium shiny metallic gold/copper reflections */}
           <Environment preset="studio" />
