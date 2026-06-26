@@ -155,13 +155,13 @@ function Record3D({ index, position, gameState, isActive, isPulse, isHidden, isD
   const meshRef = useRef();
   const ringRef = useRef();
   const materialRef = useRef();
+  const spinGroupRef = useRef();
 
   useFrame((state, delta) => {
-    if (meshRef.current) {
-      // Rotate record continuously
-      // Active and pulse spin slightly faster
+    if (spinGroupRef.current) {
+      // Rotate record horizontally (around vertical Y-axis)
       const speed = isPulse ? 3.0 : (isActive ? 2.5 : 1.5);
-      meshRef.current.rotation.z += delta * speed;
+      spinGroupRef.current.rotation.y += delta * speed;
     }
 
     if (materialRef.current) {
@@ -179,7 +179,7 @@ function Record3D({ index, position, gameState, isActive, isPulse, isHidden, isD
         ringRef.current.material.opacity = 0.8 + Math.sin(state.clock.getElapsedTime() * 12) * 0.2;
       } else {
         ringRef.current.scale.set(1, 1, 1);
-        ringRef.current.material.opacity = (gameState === 'idle' || gameState === 'name_entered') ? 0.3 : 0.0;
+        ringRef.current.material.opacity = (gameState === 'idle' || gameState === 'name_entered') ? 0.35 : 0.0;
       }
     }
   });
@@ -189,28 +189,30 @@ function Record3D({ index, position, gameState, isActive, isPulse, isHidden, isD
     : textures.dark;
 
   const emissiveColor = (isPulse || isActive) ? '#ff5500' : '#000000';
-  const emissiveIntensity = isPulse ? 2.0 : (isActive ? 1.2 : 0.0);
+  const emissiveIntensity = isPulse ? 1.5 : (isActive ? 0.8 : 0.0);
 
   return (
     <group position={position} visible={!isHidden}>
-      {/* Glowing border ring */}
-      <mesh ref={ringRef} position={[0, 0, -0.01]}>
-        <ringGeometry args={[0.67, 0.7, 64]} />
-        <meshBasicMaterial color="#ff5500" transparent opacity={0.3} depthWrite={false} />
-      </mesh>
+      <group ref={spinGroupRef}>
+        {/* Glowing border ring */}
+        <mesh ref={ringRef} position={[0, 0, -0.015]}>
+          <ringGeometry args={[0.67, 0.7, 64]} />
+          <meshBasicMaterial color="#ff5500" transparent opacity={0.3} depthWrite={false} />
+        </mesh>
 
-      {/* Record Cylinder */}
-      <mesh ref={meshRef}>
-        <cylinderGeometry args={[0.66, 0.66, 0.02, 64]} />
-        <meshStandardMaterial
-          ref={materialRef}
-          map={texture}
-          roughness={0.25}
-          metalness={0.75}
-          emissive={new THREE.Color(emissiveColor)}
-          emissiveIntensity={emissiveIntensity}
-        />
-      </mesh>
+        {/* Record Cylinder (rotated to face camera) */}
+        <mesh ref={meshRef} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.66, 0.66, 0.015, 64]} />
+          <meshStandardMaterial
+            ref={materialRef}
+            map={texture}
+            roughness={0.9}
+            metalness={0.0}
+            emissive={new THREE.Color(emissiveColor)}
+            emissiveIntensity={emissiveIntensity}
+          />
+        </mesh>
+      </group>
     </group>
   );
 }
@@ -221,6 +223,7 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
   const vinylGroupRef = useRef();
   const ringRef = useRef();
   const startTimeRef = useRef(null);
+  const initialYRotationRef = useRef(0);
 
   useFrame((state, delta) => {
     if (gameState === 'winner_pulse') {
@@ -228,10 +231,15 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
       const pulse = 1.0 + Math.sin(state.clock.getElapsedTime() * 10) * 0.06;
       groupRef.current.scale.set(pulse, pulse, pulse);
       groupRef.current.position.copy(gridPosition);
-      groupRef.current.rotation.set(0, 0, 0);
+      
+      // Rotate record horizontally (around Y-axis) during pulse state
+      groupRef.current.rotation.y += delta * 2.5;
+      groupRef.current.rotation.x = 0;
+      groupRef.current.rotation.z = 0;
 
       if (vinylGroupRef.current) {
-        vinylGroupRef.current.rotation.z += delta * 3.0; // Fast spin
+        // Local Z rotation of the grooves
+        vinylGroupRef.current.rotation.z += delta * 1.5;
       }
       if (ringRef.current) {
         ringRef.current.material.opacity = 0.8 + Math.sin(state.clock.getElapsedTime() * 12) * 0.2;
@@ -239,6 +247,8 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
     } else if (gameState === 'result') {
       if (startTimeRef.current === null) {
         startTimeRef.current = state.clock.getElapsedTime();
+        // Capture initial Y rotation when entering result state
+        initialYRotationRef.current = groupRef.current.rotation.y % (Math.PI * 2);
       }
       
       const elapsed = state.clock.getElapsedTime() - startTimeRef.current;
@@ -254,17 +264,19 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
 
       const tVal = easeOutBack(progress);
 
-      // Interpolate position to center (Z value 2.3 moves it close to camera)
+      // Interpolate position to center
       groupRef.current.position.x = THREE.MathUtils.lerp(gridPosition.x, 0, tVal);
-      groupRef.current.position.y = THREE.MathUtils.lerp(gridPosition.y, -0.2, tVal); // slightly down for better layout
+      groupRef.current.position.y = THREE.MathUtils.lerp(gridPosition.y, -0.2, tVal);
       groupRef.current.position.z = THREE.MathUtils.lerp(gridPosition.z, 2.3, tVal);
 
       // Interpolate scale (approx 3.1x size)
       const currentScale = THREE.MathUtils.lerp(1.0, 3.1, tVal);
       groupRef.current.scale.set(currentScale, currentScale, currentScale);
 
-      // Interpolate Y rotation (the majestic 180-degree flip)
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(0, Math.PI, tVal);
+      // Interpolate Y rotation (horizontal flip)
+      // Transition from initial angle to nearest odd multiple of Math.PI to show backside
+      const targetY = initialYRotationRef.current > Math.PI ? Math.PI * 3 : Math.PI;
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(initialYRotationRef.current, targetY, tVal);
 
       // Spin the vinyl itself
       if (vinylGroupRef.current) {
@@ -300,24 +312,24 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
       {/* Rotating Vinyl Disc Group */}
       <group ref={vinylGroupRef}>
         {/* Front Face (Gold) */}
-        <mesh position={[0, 0, 0.005]}>
+        <mesh position={[0, 0, 0.005]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.66, 0.66, 0.01, 64]} />
           <meshStandardMaterial
             map={textures.gold}
-            roughness={0.2}
-            metalness={0.8}
+            roughness={0.9}
+            metalness={0.0}
             emissive={new THREE.Color('#ff5500')}
             emissiveIntensity={gameState === 'winner_pulse' ? 1.5 : 0.4}
           />
         </mesh>
 
         {/* Back Face (Dark iPad Vinyl) */}
-        <mesh position={[0, 0, -0.005]} rotation={[0, Math.PI, 0]}>
+        <mesh position={[0, 0, -0.005]} rotation={[-Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.66, 0.66, 0.01, 64]} />
           <meshStandardMaterial
             map={textures.darkIpad}
-            roughness={0.3}
-            metalness={0.7}
+            roughness={0.9}
+            metalness={0.0}
             emissive={new THREE.Color('#ff5500')}
             emissiveIntensity={0.6}
           />
