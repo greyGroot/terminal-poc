@@ -204,7 +204,7 @@ function Record3D({ index, position, gameState, isActive, isPulse, isHidden, isD
 
         {/* Record Cylinder (rotated to face camera) */}
         <mesh ref={meshRef} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.66, 0.66, 0.015, 64]} />
+          <cylinderGeometry args={[0.66, 0.66, 0.04, 64]} />
           <meshStandardMaterial
             ref={materialRef}
             map={texture}
@@ -324,8 +324,8 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
       {/* Rotating Vinyl Disc Group */}
       <group ref={vinylGroupRef}>
         {/* Front Face (Gold) */}
-        <mesh position={[0, 0, 0.005]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.66, 0.66, 0.01, 64]} />
+        <mesh position={[0, 0, 0.01]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.66, 0.66, 0.02, 64]} />
           <meshStandardMaterial
             map={textures.gold}
             roughness={0.15}
@@ -336,8 +336,8 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
         </mesh>
 
         {/* Back Face (Black Vinyl) */}
-        <mesh position={[0, 0, -0.005]} rotation={[-Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.66, 0.66, 0.01, 64]} />
+        <mesh position={[0, 0, -0.01]} rotation={[-Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.66, 0.66, 0.02, 64]} />
           <meshStandardMaterial
             map={textures.dark}
             roughness={0.22}
@@ -349,7 +349,7 @@ function WinnerRecord3D({ gridPosition, gameState, resultData, textures, lang, t
       </group>
 
       {/* Non-spinning, flipping HTML Result Container */}
-      <group rotation={[0, Math.PI, 0]} position={[0, 0, -0.012]} scale={[0.87, 0.87, 1]} visible={showResultOverlay}>
+      <group rotation={[0, Math.PI, 0]} position={[0, 0, -0.022]} scale={[0.87, 0.87, 1]} visible={showResultOverlay}>
         <Html
           transform
           occlude
