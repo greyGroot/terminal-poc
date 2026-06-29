@@ -1,5 +1,8 @@
 # Mastercard Terminal Interactive Experience - Product Flow
 
+> [!NOTE]
+> **Future Update Plan:** The Hostess Page is planned to be updated so that the hostess sees a feed containing only winners. Clicking on a winner record will allow her to edit and update their photo, phone number, or name directly.
+
 ### 🧭 Quick Navigation
 [🔄 Step-by-Step Flow](#-step-by-step-flow) | [⚙️ Admin Panel (`/admin`)](#️-admin-panel-admin) | [🚧 Maintenance Overlay](#-maintenance-overlay-заглушка) | [👩‍💼 Hostess Page (`/hostess`)](#-hostess-page-hostess) | [🖥️ TV Screen (`/tv`)](#️-tv-screen-tv) | [📱 iPad Screen (`/ipad`)](#-ipad-screen-ipad)
 
@@ -125,6 +128,13 @@ A streamlined, restricted dashboard designed specifically for event hostesses to
   - *Rule ON:* After a player completes their turn, the iPad locks in its Idle State. A prominent button labeled **"Дозволити гру" (Allow Next Player)** appears on the Hostess Page. Tapping this button triggers a socket event that unlocks the iPad and transitions it to the **Name Entry State**.
   - *Rule OFF:* The "Allow Next Player" button is hidden. The iPad transitions automatically to the **Name Entry State** when the player taps "Start Over" (or after the timeout resets it).
 
+**6. Real-Time Event Log**
+- **Shared Activity Feed:** To maintain complete operational alignment with the admin team, the Hostess dashboard features a real-time, read-only event log showing the exact same game activity events as the Admin Panel.
+- **Event Logs Displayed:**
+  - Participant registration and name entries (e.g., `"[Time] [Name] started the game"`).
+  - Game spin outcomes (e.g., `"[Time] [Name] won iPhone 16 Pro"` or `"[Time] [Name] received prediction"`).
+  - Operations logs (e.g., `"[Time] Hostess paused the game"` or `"[Time] Queue reset for next player"`).
+
 ### 🖥️ TV Screen (`/tv`)
 The TV Screen is the main visual centerpiece of the experience, designed to attract attention and engage the audience.
 
@@ -154,7 +164,7 @@ The TV Screen is the main visual centerpiece of the experience, designed to attr
 - **Roulette State:** When the user spins, the TV shows a fast-paced 10-second roulette animation where grid items light up in a sequence, accelerating and then gracefully decelerating.
 - **Winner Pulse:** The final selected record pulses intensely with a golden glow for 2 seconds to build anticipation.
 - **Result State:** A seamless 3D animation where the winning record detaches from the grid, flies to the center, scales up, and rotates in 3D space to reveal the outcome hidden underneath it (either the physical prize graphic or a prediction message). Confetti falls in the background. **Timeout:** The result stays on screen until the Hostess taps "Restart" on the iPad, OR it automatically returns to the Idle Screen after 3 minutes of inactivity.
-- **Disconnected / Error State:** If the TV loses its WebSocket connection or encounters a critical error, it automatically falls back to displaying the **Maintenance Overlay** (mimicking the Idle Screen) so attendees do not see broken UI or browser errors.
+- **Maintenance Screen (Disconnected / Error State Fallback):** If the TV loses its WebSocket connection or encounters a critical error, it automatically falls back to displaying the **Maintenance Screen** (visually identical to the static Welcome/Idle screen but non-interactive) so attendees do not see broken UI or browser errors.
 
 **2. Hardware & Resolution Specs**
 *(Specifications for physical screen orientation, resolution, and aspect ratio will be defined here)*
@@ -179,7 +189,7 @@ The iPad Screen serves as the interactive remote control and participant registr
   - *Main Message:* "Здійснили оплату Mastercard? Активуйте свій момент" *(Did you pay with Mastercard? Activate your moment)*.
   - *Call to Action:* A large, prominent button labeled "ПОЧАТИ" *(START)*.
   - *Footer:* Mastercard 30th Anniversary branding visible.
-  - *Context:* This state is also displayed on the iPad when the TV is in **Variant 4 (End of Day / Hall of Fame Mode)** or in the **Maintenance State**.
+  - *Context:* This state is also displayed on the iPad when the TV is in **Variant 4 (End of Day / Hall of Fame Mode)** or in the **Maintenance Screen** state.
 - **Name Entry State (Name Input Screen):**
   - *Main Message:* "Введіть ваше ім'я" *(Enter your name)*.
   - *Form Element:* A single text input field with placeholder text. Tapping or clicking this input field must automatically focus it and display the iPad's native soft keyboard.
@@ -208,7 +218,7 @@ The iPad Screen serves as the interactive remote control and participant registr
   - *Trigger:* Initiated when the hostess pauses the game via the Hostess Page.
   - *Visuals:* A neutral, non-interactive holding screen displaying: "Гра тимчасово призупинена. Будь ласка, зачекайте..." *(Game temporarily paused. Please wait...)*.
   - *Behavior:* Automatically suspends current registration or input flows. The interface returns to the previous state once the hostess resumes.
-- **Maintenance State (Disconnected / Error State Fallback):**
+- **Maintenance Screen (Disconnected / Error State Fallback):**
   - *Trigger:* Activated when the admin toggles the **Maintenance Overlay** or if the iPad encounters a WebSocket connection failure.
   - *Visuals:* Displays the standard Mastercard logo and anniversary branding overlay with a subtle message: "Система оновлюється..." *(System is updating...)*. All interactive buttons and forms are hidden.
 
