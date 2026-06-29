@@ -1,5 +1,10 @@
 # Mastercard Terminal Interactive Experience - Product Flow
 
+### 🧭 Quick Navigation
+[🔄 Step-by-Step Flow](#-step-by-step-flow) | [⚙️ Admin Panel (`/admin`)](#️-admin-panel-admin) | [🚧 Maintenance Overlay](#-maintenance-overlay-заглушка) | [👩‍💼 Hostess Page (`/hostess`)](#-hostess-page-hostess) | [🖥️ TV Screen (`/tv`)](#️-tv-screen-tv) | [📱 iPad Screen (`/ipad`)](#-ipad-screen-ipad)
+
+---
+
 ## 🔄 Step-by-Step Flow
 
 | Step | Admin (`/admin`) | TV Screen (`/tv`) | iPad Screen (`/ipad`) | Hostess |
