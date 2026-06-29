@@ -32,6 +32,9 @@ The Admin Panel is a comprehensive dashboard for managing the event, monitoring 
 - **MAINTENANCE OVERLAY (Заглушка):** A critical toggle that forces the TV and iPad to display an independent holding screen. Used to safely deploy live code updates to the main app without the audience seeing browser refreshes or errors.
 - **FULL SCREEN MODE:** A toggle button that remotely forces the connected TV and iPad screens to enter full-screen view, hiding browser UI and address bars for a completely immersive experience.
 - **FORCE END OF DAY (Variant 4):** A toggle button that manually forces both the TV and iPad into the **End of Day / "Hall of Fame" Mode** (Variant 4). This allows the admin to show the wrap-up screen and winners summary early (e.g., if the booth closes before the official timer runs out). **Safety Rule:** If a game is actively in progress when this is toggled, the transition is queued and will execute only after the current player's result is revealed and resolved.
+- **STRICT LINE RULE (Optional):** An optional configuration toggle that governs game launch protocol on the iPad. By default, this rule is OFF (disabled).
+  - **When ON:** Activates controlled queuing. After a game resolves, the iPad locks. The next player cannot begin registration until the hostess explicitly triggers a release from the Hostess Page.
+  - **When OFF (Default):** Activates open queue mode. The next player can tap "Start Over" or register independently as long as the game status is active (not stopped or paused).
 
 **2. Dashboard (Real-time Metrics)**
 Features tabbed navigation (`Day 1`, `Day 2`, `Day 3`, `Total`) to view metrics for specific days or cumulative totals across all days. A quick-glance section displaying live statistics for the selected tab:
@@ -85,10 +88,37 @@ A completely separate, lightweight, and independent web application or page laye
 - **Behavior:** Because it sits entirely outside the main app bundle, it stays stable while the main app underneath reloads. When the admin turns the overlay off, it disappears, revealing the freshly updated main app.
 
 ### 👩‍💼 Hostess Page (`/hostess`)
-A streamlined, restricted interface designed specifically for event hostesses on the floor.
-- **Authentication:** Protected by a dedicated hostess password (configured by the Admin in the Admin Panel).
-- **Winner Management:** Allows the hostess to monitor the real-time Winners list, input optional phone numbers, and upload photos of the winners with their prizes. She cannot edit inventory or view overarching statistics.
-- **Game Controls (Pause):** The hostess has the ability to **PAUSE** the game from her interface. When triggered, the TV and iPad instantly revert to the static **Idle Screen**. This allows her to safely manage the crowd or process a winner without the next person starting a game.
+A streamlined, restricted dashboard designed specifically for event hostesses to manage the queue, verify winners, and control the floor experience. Optimized for mobile viewports so hostesses can use their personal smartphones on the floor.
+
+**1. Authentication & PWA (Progressive Web App) Setup**
+- **First-Time Password Prompt:** Access to `/hostess` requires a dedicated hostess password (configured in the Admin Panel). On first launch, the hostess must authenticate to access the interface.
+- **PWA Installation:** The page supports PWA criteria, prompting the hostess to "Add to Home Screen" upon initial browser access.
+- **Session Persistence:** Once authenticated, the credential/session is securely cached locally. Reopening the app or launching it from the home screen bypasses the password screen.
+- **Session Expiration:** Connection loss or WebSocket resets will NOT force the hostess to re-enter her password. However, she must re-enter the password when a new play day starts (e.g., when the active day configuration changes).
+
+**2. Connection Status Monitor**
+- **Health Check:** On initial boot and during active usage, the app performs a real-time connection check with the backend server via WebSockets.
+- **Diagnostic UI:** A persistent connection badge (Green for Online, Red for Disconnected) is shown. If disconnected, a full-screen warning modal overlays the UI, blocking hostess actions until communication is restored to prevent data loss.
+
+**3. Real-Time Prize Inventory Tracker**
+- **Live Stock Monitor:** Displays a simple list of all physical prizes configured for the active day alongside their remaining stock quantities.
+- **Indicators:** Displays plain numbers representing the remaining quantity of each prize. No visual color coding (orange/red highlights) is used.
+
+**4. Winner Management & Camera Sync**
+- **Winners Feed:** Displays a live feed of all participants who have won physical prizes during the active day.
+- **Phone Number Input:** Features an editable field next to each winner to log contact details.
+- **Photo Capture & Instant TV Push:** Includes an image upload button. The hostess uses her own smartphone's camera to take a photo of the winner with their prize or upload a file. Saving the image uploads it to the server and instantly pushes it to the TV Screen's active winners marquee.
+- **Image Preview & Crop (Optional):** An optional image cropping/preview modal can be enabled. If active, it allows the hostess to preview and adjust the photo before confirming the upload to the TV.
+
+**5. Game Controls & Queue Management**
+- **Game Pause:** A primary toggle button to **PAUSE** or **RESUME** the experience. 
+  - **Pause Behavior:** Pausing instantly transitions the TV and iPad to their respective Idle States (with the iPad start action disabled). 
+  - **Active Game Safety:** If a game is in progress when pause is triggered, the action is queued and takes effect immediately after the current player completes their game and the result is revealed.
+- **Maintenance Overlay Toggle:** A secondary toggle allowing the hostess to activate the Maintenance Overlay ("Заглушка") in case of local technical issues or booth resets.
+- **Strict Line Rule Interface (Conditional):**
+  - *Context:* This control visibility depends on the **Strict Line Rule** setting configured in the Admin Panel.
+  - *Rule ON:* After a player completes their turn, the iPad locks in its Idle State. A prominent button labeled **"Дозволити гру" (Allow Next Player)** appears on the Hostess Page. Tapping this button triggers a socket event that unlocks the iPad and transitions it to the **Name Entry State**.
+  - *Rule OFF:* The "Allow Next Player" button is hidden. The iPad transitions automatically to the **Name Entry State** when the player taps "Start Over" (or after the timeout resets it).
 
 ### 🖥️ TV Screen (`/tv`)
 The TV Screen is the main visual centerpiece of the experience, designed to attract attention and engage the audience.
@@ -132,9 +162,60 @@ If venue acoustics allow, the TV experience should be enhanced with audio cues:
 - **Result State:** Triumphant fanfare for physical prizes, or a gentle, whimsical sound for predictions.
 
 ### 📱 iPad Screen (`/ipad`)
-The iPad Screen serves as the interactive remote control for the participant.
-- **Welcome Screen:** Displays Mastercard branding, brief instructions, and a "Start" button. Includes a hidden language selector at the top right for initial setup.
-- **Name Input:** A clean, distraction-free interface prompting the user to type their name using the on-screen keyboard.
-- **Ready Screen:** A final confirmation screen with a giant "PLAY" button that triggers the socket event to spin the TV roulette.
-- **Spin Animation:** While the TV roulette is running, the iPad displays a 3D-styled animated vinyl record player with a tonearm placed on the spinning record.
-- **Result Screen:** Once the game finishes and the TV shows the result, the iPad vinyl record dims and a "Restart" button appears, allowing the user (or Hostess) to reset the experience for the next person in line.
+The iPad Screen serves as the interactive remote control and participant registrar for the terminal experience.
+
+**1. Persistent Branding & Layout Rules**
+- **Anniversary Footer:** Every screen state on the iPad must display the Mastercard 30th Anniversary logo and localized tagline (`"30 років з Україною"` / `"30 Years in Ukraine"`) at the bottom of the layout.
+- **Footer Exception (Roulette State):** The anniversary footer is temporarily hidden during the active **Roulette State (Spin Animation)** to optimize visual focus and reduce layout clutter.
+- **Hidden Full Screen Toggle:** A barely visible full-screen toggle button is placed in the top right corner of the **Idle State (Welcome Screen)**. To prevent accidental exit by attendees during the event, it is hidden and can only be activated by a long-press (3 seconds) action.
+
+**2. Detailed Screen States & User Flow**
+- **Idle State (Welcome Screen / Attract Mode):**
+  - *Main Message:* "Здійснили оплату Mastercard? Активуйте свій момент" *(Did you pay with Mastercard? Activate your moment)*.
+  - *Call to Action:* A large, prominent button labeled "ПОЧАТИ" *(START)*.
+  - *Footer:* Mastercard 30th Anniversary branding visible.
+  - *Context:* This state is also displayed on the iPad when the TV is in **Variant 4 (End of Day / Hall of Fame Mode)** or in the **Maintenance State**.
+- **Name Entry State (Name Input Screen):**
+  - *Main Message:* "Введіть ваше ім'я" *(Enter your name)*.
+  - *Form Element:* A single text input field with placeholder text. Tapping or clicking this input field must automatically focus it and display the iPad's native soft keyboard.
+  - *Action Button:* Labeled "ПРОДОВЖИТИ" *(CONTINUE)*.
+  - *Layout Rule:* The "ПРОДОВЖИТИ" action button must remain fully visible and interactive on the screen when the soft keyboard is open, and must not be obscured or pushed off-screen by the keyboard layout.
+  - *Input Validation & Limits:*
+    - **Character Limit:** Minimum of 2 characters, maximum of 20 characters.
+    - **Allowed Characters:** Strictly Cyrillic and Latin alphabets, spaces, hyphens, and apostrophes. Numbers, emojis, and special symbols are blocked.
+    - **Forbidden Words & Profanity Filter:** The system must check the name input against a robust, localized profanity dictionary. Names containing vulgar words, swear words, or insults (e.g., standard profanities in English and Ukrainian) must be blocked.
+    - **Geopolitical & Offensive Terms Filter:** Explicitly bans derogatory, hostile, or offensive terms related to the Russian invasion, symbols of aggression, or invader-related slurs.
+    - **Active State:** The "ПРОДОВЖИТИ" button remains disabled (greyed out) until the name passes all validation rules.
+- **Ready State (Game Trigger Screen):**
+  - *Main Message:* "НАТИСНІТЬ СТАРТ, ЩОБ ПОЧАТИ ГРУ" *(TAP START TO BEGIN THE GAME)*.
+  - *Action Button:* A massive, high-contrast button labeled "СТАРТ" *(START)*.
+  - *Behavior:* Tapping "СТАРТ" sends a socket event triggering the TV roulette spin and immediately transitions the iPad to the **Roulette State (Spin Animation)**.
+- **Roulette State (Spin Animation):**
+  - *Visuals:* An animated 3D-style vinyl record player with a tonearm placed on a spinning record, representing the game in progress.
+  - *Branding:* Footer is hidden. No buttons are displayed.
+  - *Behavior:* Interactive controls are locked. This state is maintained for exactly 10 seconds to match the TV screen's spin and reveal sequence.
+- **Post-Game Reset Screen:**
+  - *Concept:* To avoid visual mismatch and animation lag relative to the TV reveal, the iPad skips showing dedicated Winner or Prediction/Comfort screens.
+  - *Visuals:* The vinyl record animation stops, and a clean **"Start Over" / "Finish"** screen is presented.
+  - *Action Button:* A prominent button labeled "Завершити" *(Finish)* or "Start Over".
+  - *Behavior (Direct registration loop):* When the user taps this button, the iPad immediately opens the **Name Entry State (Name Input Screen)** for the next participant, bypassing the Welcome/Attract screen to keep the queue moving.
+- **On Hold / Game Paused State:**
+  - *Trigger:* Initiated when the hostess pauses the game via the Hostess Page.
+  - *Visuals:* A neutral, non-interactive holding screen displaying: "Гра тимчасово призупинена. Будь ласка, зачекайте..." *(Game temporarily paused. Please wait...)*.
+  - *Behavior:* Automatically suspends current registration or input flows. The interface returns to the previous state once the hostess resumes.
+- **Maintenance State (Disconnected / Error State Fallback):**
+  - *Trigger:* Activated when the admin toggles the **Maintenance Overlay** or if the iPad encounters a WebSocket connection failure.
+  - *Visuals:* Displays the standard Mastercard logo and anniversary branding overlay with a subtle message: "Система оновлюється..." *(System is updating...)*. All interactive buttons and forms are hidden.
+
+**3. Inactivity & Safety Rules**
+- **Registration Timeout:** If an attendee walks away mid-registration (during the **Name Entry State** or **Ready State**) for more than 45 seconds, a modal warning with a 10-second countdown ("Ви ще тут?" / "Are you still here?") appears. If unanswered, the iPad automatically wipes the entered name and resets to the **Idle State (Welcome Screen)**.
+- **Post-Game / Name Entry Reset Timeout:** If the player walks away after the game finishes without tapping "Start Over", or if the next player leaves the iPad open on the Name Entry screen without any activity, the iPad automatically resets to the **Idle State (Welcome Screen)** after **30 seconds** of inactivity.
+- **Active Game Lockout:** Once the spin command is sent, the iPad cannot be reset by any attendee action until the game resolution is logged and the TV screen's animation finishes.
+
+**4. Sound & Audio Design (Nice-to-Have)**
+- **UI Interaction:** A clean, tactile click/tap sound on buttons and keyboard presses.
+- **Input Error:** A low-pitched double beep if validation blocks disallowed characters or forbidden substrings.
+- **Roulette Trigger:** A classic vinyl "scratch" sound when tapping the "СТАРТ" button.
+- **Spinning Ambient:** A soft, rhythmic whirring or vinyl crackle during the **Roulette State (Spin Animation)**.
+- **Winner Fanfare:** A bright, uplifting copper-gold chime sequence played once the TV completes the prize reveal.
+- **Prediction Chime:** A mystical, calming sound effect played once the TV reveals the prediction.
