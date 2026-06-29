@@ -91,11 +91,44 @@ A streamlined, restricted interface designed specifically for event hostesses on
 
 ### 🖥️ TV Screen (`/tv`)
 The TV Screen is the main visual centerpiece of the experience, designed to attract attention and engage the audience.
-- **Idle State:** Displays a 5x5 grid of glowing copper-gold vinyl records, a large Mastercard logo, and a 30-year anniversary title. The records gently rotate.
+
+**1. Core Visual States**
+- **Idle State:** The Idle Screen supports 4 distinct layout variants/modes.
+  - **Variant 1 (3-Panel Vertical Layout):**
+    - **Center Panel:** Displays a dynamic grid of gently rotating glowing copper-gold vinyl records. It features a header with the Mastercard logo and "30 Years Anniversary", a central catchphrase ("Catch your moment"), and a footer with the Mastercard logo and the text "Each concert is a priceless moment."
+    - **Left Panel (Winners Board):** Displays a live feed of winners. Shows the winner's photo, their name, and the name of the prize won. If a winner declined a photo, a stylized shadow/silhouette (man, woman, boy, or girl) is displayed instead. **Scrolling:** Displays as a vertically scrolling marquee of all winners. **Visibility Rule:** If there are no winners yet, this panel is completely hidden.
+    - **Right Panel (Prize Inventory):** Displays an alluring list of the available top prizes (e.g., iPhone 16 Pro, PS5, Dyson) with their respective images. **Depletion Rule:** When a specific physical prize is fully depleted (stock reaches 0), its image simply disappears from the screen.
+  - **Variant 2 (Top/Bottom Horizontal Layout):**
+    - **Center Panel:** The main dynamic vinyl grid remains the focal point in the middle of the screen.
+    - **Top Panel (Winners Board):** The winners feed is placed at the top of the screen above the grid. **Scrolling:** Functions as a horizontally scrolling marquee. **Visibility Rule:** Just like Variant 1, if there are no winners yet, this panel is completely hidden.
+    - **Bottom Panel (Prize Inventory):** The available prizes are displayed in a horizontal row below the grid. **Depletion Rule:** Prizes disappear when stock reaches 0.
+  - **Variant 3 (Tutorial / Promo Mode):**
+    - **Layout:** Inherits the panel positioning of either Variant 1 or Variant 2.
+    - **Behavior:** The main difference is the central grid's behavior. After 30 seconds of inactivity, the vinyl grid transitions into an engaging, animated tutorial explaining how to participate.
+    - **Tutorial Flow:** "1. Pay a bill of at least 100 UAH with Mastercard. -> 2. Play the game. -> 3. Win one of the following prizes!"
+  - **Variant 4 (End of Day / "Hall of Fame" Mode):**
+    - **Trigger:** Displayed when the active day's time limit expires, or if ALL physical prizes have been completely won.
+    - **Layout:** The standard game grid fades out and is replaced by a massive, celebratory "Hall of Fame" mosaic or scrolling grid showcasing all the players who won that day.
+    - **Dynamic Messaging:** 
+      - *"To celebrate Mastercard's 30th anniversary, these lucky people caught their priceless moment and won!"*
+      - **If there is a next day:** *"The game will continue tomorrow! We are waiting for you."*
+      - **If it's the final day (or stock is empty):** *"Thank you for celebrating with us. Every concert is a priceless moment."*
+  - **Standard Attract Mode:** For Variants 1 & 2, every 30 seconds of inactivity triggers a shimmering wave of light passing across the central vinyl records to catch the audience's eye.
 - **Name Entered State:** Once a user enters their name on the iPad, the TV reacts by displaying a massive, personalized welcome message (e.g., "Welcome, [Name]! Are you ready to catch your priceless moment?") over a dark overlay.
 - **Roulette State:** When the user spins, the TV shows a fast-paced 10-second roulette animation where grid items light up in a sequence, accelerating and then gracefully decelerating.
 - **Winner Pulse:** The final selected record pulses intensely with a golden glow for 2 seconds to build anticipation.
-- **Result State:** A seamless 2D animation where the winning record detaches from the grid, flies to the center, scales up, and fades to a dark vinyl texture (resembling the "reverse side"). It then displays either the won prize (with a graphic placeholder) or a personalized prediction/message. Confetti falls in the background.
+- **Result State:** A seamless 3D animation where the winning record detaches from the grid, flies to the center, scales up, and rotates in 3D space to reveal the outcome hidden underneath it (either the physical prize graphic or a prediction message). Confetti falls in the background. **Timeout:** The result stays on screen until the Hostess taps "Restart" on the iPad, OR it automatically returns to the Idle Screen after 3 minutes of inactivity.
+- **Disconnected / Error State:** If the TV loses its WebSocket connection or encounters a critical error, it automatically falls back to displaying the **Maintenance Overlay** (mimicking the Idle Screen) so attendees do not see broken UI or browser errors.
+
+**2. Hardware & Resolution Specs**
+*(Specifications for physical screen orientation, resolution, and aspect ratio will be defined here)*
+
+**3. Sound & Audio Design (Nice-to-Have)**
+If venue acoustics allow, the TV experience should be enhanced with audio cues:
+- **Idle:** Low ambient background music.
+- **Name Entered:** An emphatic *whoosh* or engaging chime.
+- **Roulette State:** Fast-paced ticking that matches the spinning lights.
+- **Result State:** Triumphant fanfare for physical prizes, or a gentle, whimsical sound for predictions.
 
 ### 📱 iPad Screen (`/ipad`)
 The iPad Screen serves as the interactive remote control for the participant.
