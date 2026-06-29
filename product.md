@@ -31,6 +31,7 @@ The Admin Panel is a comprehensive dashboard for managing the event, monitoring 
 - **RESTART:** Resets the game to its initial state for a new day or test run. Returns Prize Inventory to initial quantities and clears the Winners list for the day. *Log statistics are preserved.*
 - **MAINTENANCE OVERLAY (Заглушка):** A critical toggle that forces the TV and iPad to display an independent holding screen. Used to safely deploy live code updates to the main app without the audience seeing browser refreshes or errors.
 - **FULL SCREEN MODE:** A toggle button that remotely forces the connected TV and iPad screens to enter full-screen view, hiding browser UI and address bars for a completely immersive experience.
+- **FORCE END OF DAY (Variant 4):** A toggle button that manually forces both the TV and iPad into the **End of Day / "Hall of Fame" Mode** (Variant 4). This allows the admin to show the wrap-up screen and winners summary early (e.g., if the booth closes before the official timer runs out).
 
 **2. Dashboard (Real-time Metrics)**
 Features tabbed navigation (`Day 1`, `Day 2`, `Day 3`, `Total`) to view metrics for specific days or cumulative totals across all days. A quick-glance section displaying live statistics for the selected tab:
