@@ -161,10 +161,10 @@ The TV Screen is the main visual centerpiece of the experience, designed to attr
       - **If it's the final day (or stock is empty):** *"Thank you for celebrating with us. Every concert is a priceless moment."*
   - **Standard Attract Mode:** For Variants 1 & 2, every 30 seconds of inactivity triggers a shimmering wave of light passing across the central vinyl records to catch the audience's eye.
 - **Name Entered State:** Once a user enters their name on the iPad, the TV reacts by displaying a massive, personalized welcome message (e.g., "Welcome, [Name]! Are you ready to catch your priceless moment?") over a dark overlay.
-- **Roulette State:** When the user spins, the TV shows a fast-paced 10-second roulette animation where grid items light up in a sequence, accelerating and then gracefully decelerating.
+- **Roulette State (Spin Animation):** When the user spins, the TV shows a fast-paced 10-second roulette animation where grid items light up in a sequence, accelerating and then gracefully decelerating.
 - **Winner Pulse:** The final selected record pulses intensely with a golden glow for 2 seconds to build anticipation.
-- **Result State:** A seamless 3D animation where the winning record detaches from the grid, flies to the center, scales up, and rotates in 3D space to reveal the outcome hidden underneath it (either the physical prize graphic or a prediction message). Confetti falls in the background. **Timeout:** The result stays on screen until the Hostess taps "Restart" on the iPad, OR it automatically returns to the Idle Screen after 3 minutes of inactivity.
-- **Maintenance Screen (Disconnected / Error State Fallback):** If the TV loses its WebSocket connection or encounters a critical error, it automatically falls back to displaying the **Maintenance Screen** (visually identical to the static Welcome/Idle screen but non-interactive) so attendees do not see broken UI or browser errors.
+- **TV Reveal State (3D Detaching Reveal):** A seamless 3D reveal animation where the winning record detaches from the grid, flies to the center, scales up, and rotates in 3D space to reveal the outcome hidden underneath it (either the physical prize graphic or a prediction message). Confetti falls in the background. **Timeout:** The result stays on screen until the Hostess taps "Restart" on the iPad, OR it automatically returns to the Idle Screen after 3 minutes of inactivity.
+- **Maintenance Screen:** If the TV loses its WebSocket connection or encounters a critical error, it automatically falls back to displaying the **Maintenance Screen** (visually identical to the static Welcome/Idle screen but non-interactive; this also acts as the **Broke Connection Screen** state) so attendees do not see broken UI or browser errors.
 
 **2. Hardware & Resolution Specs**
 *(Specifications for physical screen orientation, resolution, and aspect ratio will be defined here)*
@@ -181,16 +181,16 @@ The iPad Screen serves as the interactive remote control and participant registr
 
 **1. Persistent Branding & Layout Rules**
 - **Anniversary Footer:** Every screen state on the iPad must display the Mastercard 30th Anniversary logo and localized tagline (`"30 років з Україною"` / `"30 Years in Ukraine"`) at the bottom of the layout.
-- **Footer Exception (Roulette State):** The anniversary footer is temporarily hidden during the active **Roulette State (Spin Animation)** to optimize visual focus and reduce layout clutter.
+- **Footer Exception (Roulette State):** The anniversary footer is temporarily hidden during the active **Roulette State (Spin Locked Screen)** to optimize visual focus and reduce layout clutter.
 - **Hidden Full Screen Toggle:** A barely visible full-screen toggle button is placed in the top right corner of the **Idle State (Welcome Screen)**. To prevent accidental exit by attendees during the event, it is hidden and can only be activated by a long-press (3 seconds) action.
 
 **2. Detailed Screen States & User Flow**
-- **Idle State (Welcome Screen / Attract Mode):**
+- **Idle State (Welcome Screen):**
   - *Main Message:* "Здійснили оплату Mastercard? Активуйте свій момент" *(Did you pay with Mastercard? Activate your moment)*.
   - *Call to Action:* A large, prominent button labeled "ПОЧАТИ" *(START)*.
   - *Footer:* Mastercard 30th Anniversary branding visible.
   - *Context:* This state is also displayed on the iPad when the TV is in **Variant 4 (End of Day / Hall of Fame Mode)** or in the **Maintenance Screen** state.
-- **Name Entry State (Name Input Screen):**
+- **Name Entry State:**
   - *Main Message:* "Введіть ваше ім'я" *(Enter your name)*.
   - *Form Element:* A single text input field with placeholder text. Tapping or clicking this input field must automatically focus it and display the iPad's native soft keyboard.
   - *Action Button:* Labeled "ПРОДОВЖИТИ" *(CONTINUE)*.
@@ -201,11 +201,11 @@ The iPad Screen serves as the interactive remote control and participant registr
     - **Forbidden Words & Profanity Filter:** The system must check the name input against a robust, localized profanity dictionary. Names containing vulgar words, swear words, or insults (e.g., standard profanities in English and Ukrainian) must be blocked.
     - **Geopolitical & Offensive Terms Filter:** Explicitly bans derogatory, hostile, or offensive terms related to the Russian invasion, symbols of aggression, or invader-related slurs.
     - **Active State:** The "ПРОДОВЖИТИ" button remains disabled (greyed out) until the name passes all validation rules.
-- **Ready State (Game Trigger Screen):**
+- **Ready State:**
   - *Main Message:* "НАТИСНІТЬ СТАРТ, ЩОБ ПОЧАТИ ГРУ" *(TAP START TO BEGIN THE GAME)*.
   - *Action Button:* A massive, high-contrast button labeled "СТАРТ" *(START)*.
-  - *Behavior:* Tapping "СТАРТ" sends a socket event triggering the TV roulette spin and immediately transitions the iPad to the **Roulette State (Spin Animation)**.
-- **Roulette State (Spin Animation):**
+  - *Behavior:* Tapping "СТАРТ" sends a socket event triggering the TV roulette spin and immediately transitions the iPad to the **Roulette State (Spin Locked Screen)**.
+- **Roulette State (Spin Locked Screen):**
   - *Visuals:* An animated 3D-style vinyl record player with a tonearm placed on a spinning record, representing the game in progress.
   - *Branding:* Footer is hidden. No buttons are displayed.
   - *Behavior:* Interactive controls are locked. This state is maintained for exactly 10 seconds to match the TV screen's spin and reveal sequence.
@@ -213,14 +213,14 @@ The iPad Screen serves as the interactive remote control and participant registr
   - *Concept:* To avoid visual mismatch and animation lag relative to the TV reveal, the iPad skips showing dedicated Winner or Prediction/Comfort screens.
   - *Visuals:* The vinyl record animation stops, and a clean **"Start Over" / "Finish"** screen is presented.
   - *Action Button:* A prominent button labeled "Завершити" *(Finish)* or "Start Over".
-  - *Behavior (Direct registration loop):* When the user taps this button, the iPad immediately opens the **Name Entry State (Name Input Screen)** for the next participant, bypassing the Welcome/Attract screen to keep the queue moving.
+  - *Behavior (Direct registration loop):* When the user taps this button, the iPad immediately opens the **Name Entry State** for the next participant, bypassing the Welcome Screen to keep the queue moving.
 - **On Hold / Game Paused State:**
   - *Trigger:* Initiated when the hostess pauses the game via the Hostess Page.
   - *Visuals:* A neutral, non-interactive holding screen displaying: "Гра тимчасово призупинена. Будь ласка, зачекайте..." *(Game temporarily paused. Please wait...)*.
   - *Behavior:* Automatically suspends current registration or input flows. The interface returns to the previous state once the hostess resumes.
-- **Maintenance Screen (Disconnected / Error State Fallback):**
+- **Maintenance Screen:**
   - *Trigger:* Activated when the admin toggles the **Maintenance Overlay** or if the iPad encounters a WebSocket connection failure.
-  - *Visuals:* Displays the standard Mastercard logo and anniversary branding overlay with a subtle message: "Система оновлюється..." *(System is updating...)*. All interactive buttons and forms are hidden.
+  - *Visuals:* Displays the standard Mastercard logo and anniversary branding overlay with a subtle message: "Система оновлюється..." *(System is updating...)*. All interactive buttons and forms are hidden. This layout also represents the **Broke Connection Screen** fallback.
 
 **3. Inactivity & Safety Rules**
 - **Registration Timeout:** If an attendee walks away mid-registration (during the **Name Entry State** or **Ready State**) for more than 45 seconds, a modal warning with a 10-second countdown ("Ви ще тут?" / "Are you still here?") appears. If unanswered, the iPad automatically wipes the entered name and resets to the **Idle State (Welcome Screen)**.

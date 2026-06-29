@@ -17,7 +17,7 @@ This scenario details the setup lifecycle: moving the system from offline config
 - **Step 2: Admin Starts Day**
   - **Admin Panel (`/admin`):** Admin clicks **START**. Metrics countdown timers begin. Status log: "Day started".
   - **WebSocket Event:** `server -> all: game_status_changed { status: "started" }`
-  - **iPad Controller (`/ipad`):** Transitions to active **Idle State (Welcome Screen / Attract Mode)**. Start button enabled.
+  - **iPad Controller (`/ipad`):** Transitions to active **Idle State (Welcome Screen)**. Start button enabled.
   - **TV Screen (`/tv`):** Transitions to active **Idle State (Variant 1/2)**. Glowing vinyl grid runs.
   - **Hostess Page (`/hostess`):** Mobile UI unlocks. Hostess sees valid active stock counts and queue/pause controls.
 - **Step 3: Pre-Game Validation / Testing**
@@ -35,7 +35,7 @@ This scenario details the setup lifecycle: moving the system from offline config
 - **Step 5: Admin Starts Game (Production Live)**
   - **Admin Panel (`/admin`):** Admin clicks **START**. System enters live production. Status log: "Production game started".
   - **WebSocket Event:** `server -> all: game_status_changed { status: "started" }`
-  - **iPad Controller (`/ipad`):** Transitions to active **Idle State (Welcome Screen / Attract Mode)**. Ready for real attendees.
+  - **iPad Controller (`/ipad`):** Transitions to active **Idle State (Welcome Screen)**. Ready for real attendees.
   - **TV Screen (`/tv`):** Transitions to active **Idle State (Variant 1/2)**. Glowing vinyl grid runs.
   - **Hostess Page (`/hostess`):** Mobile UI unlocks; ready for live floor operations.
 
@@ -51,9 +51,9 @@ This scenario details the end-to-end participant flow when winning a physical pr
   - **Admin Panel (`/admin`):** Dashboard active. Status: "Idle/Active".
   - **Hostess Page (`/hostess`):** Mobile page shows online connection, initial stock counts, and log history.
 - **Step 2: Begin Registration**
-  - **iPad Controller (`/ipad`):** User clicks **"ПОЧАТИ" (START)** button. Transitions to **Name Entry State (Name Input Screen)**.
+  - **iPad Controller (`/ipad`):** User clicks **"ПОЧАТИ" (START)** button. Transitions to **Name Entry State**.
   - **WebSocket Event:** `ipad -> server: user_began_registration`
-  - **TV Screen (`/tv`):** Remains in active **Idle State**.
+  - **TV Screen (`/tv`):** Remains in active **Idle State (Variant 1/2)**.
   - **Admin Panel (`/admin`):** Logs: `"[Time] Participant started registration on iPad."`
   - **Hostess Page (`/hostess`):** No changes.
 - **Step 3: Name Submission**
@@ -63,19 +63,19 @@ This scenario details the end-to-end participant flow when winning a physical pr
   - **Admin Panel (`/admin`):** Logs participant registration: `"[Time] Registered participant [Name]"`.
   - **Hostess Page (`/hostess`):** No changes.
 - **Step 4: Spin Trigger**
-  - **iPad Controller (`/ipad`):** User taps giant **"СТАРТ"** button. Transitions to **Roulette State (Spin Animation)**. Footer hidden.
+  - **iPad Controller (`/ipad`):** User taps giant **"СТАРТ"** button. Transitions to **Roulette State (Spin Locked Screen)**. Footer hidden.
   - **WebSocket Event:** `ipad -> server: game_spin_trigger`
-  - **TV Screen (`/tv`):** Transitions to **Roulette State**. Starts 10-second vinyl record highlight spin.
+  - **TV Screen (`/tv`):** Transitions to **Roulette State (Spin Animation)**. Starts 10-second vinyl record highlight spin.
   - **Admin Panel (`/admin`):** Increments "Games Played" metrics. Logs spin trigger.
   - **Hostess Page (`/hostess`):** No changes.
 - **Step 5: Spin & Result**
-  - **iPad Controller (`/ipad`):** Plays mechanical sound. Record player animation runs. Interactive controls locked.
+  - **iPad Controller (`/ipad`):** Plays mechanical sound. Record player animation runs. Interactive controls locked in **Roulette State (Spin Locked Screen)**.
   - **WebSocket Event:** `server -> all: game_result { outcome: "win", prize: "..." }`
   - **TV Screen (`/tv`):** Roulette sequence decelerates and stops on selected winning record (Winner Pulse).
   - **Admin Panel (`/admin`):** Randomizer selects winning physical prize based on stock & cooldown. Logs win. Decreases the amount of prize in DB.
   - **Hostess Page (`/hostess`):** Remaining stock counts update.
 - **Step 6: TV Reveal & Reset Screen**
-  - **TV Screen (`/tv`):** Selected record detaches, flies to center, and rotates in 3D to reveal physical prize. After animation is finished.
+  - **TV Screen (`/tv`):** Transitions to **TV Reveal State (3D Detaching Reveal)**. Selected record detaches, flies to center, and rotates in 3D to reveal physical prize.
   - **WebSocket Event:** `tv -> server: prize_displayed`
   - **iPad Controller (`/ipad`):** Animation ends. Transitions to **Post-Game Reset Screen** displaying "Start Over" button.
   - **Admin Panel (`/admin`):** Updates winners list. Increments Winner Count metrics.
@@ -111,9 +111,9 @@ This scenario details the participant flow when no physical prize is won, result
   - **Admin Panel (`/admin`):** Dashboard active. Status: "Idle/Active".
   - **Hostess Page (`/hostess`):** Mobile page shows online connection, stock counts, and log history.
 - **Step 2: Begin Registration**
-  - **iPad Controller (`/ipad`):** User clicks **"ПОЧАТИ" (START)**. Transitions to **Name Entry State (Name Input Screen)**.
+  - **iPad Controller (`/ipad`):** User clicks **"ПОЧАТИ" (START)**. Transitions to **Name Entry State**.
   - **WebSocket Event:** `ipad -> server: user_began_registration`
-  - **TV Screen (`/tv`):** Remains in active **Idle State**.
+  - **TV Screen (`/tv`):** Remains in active **Idle State (Variant 1/2)**.
   - **Admin Panel (`/admin`):** Logs: `"[Time] Participant started registration on iPad."`
   - **Hostess Page (`/hostess`):** No changes.
 - **Step 3: Name Submission**
@@ -123,27 +123,27 @@ This scenario details the participant flow when no physical prize is won, result
   - **Admin Panel (`/admin`):** Logs: `"[Time] Registered participant [Name]"`.
   - **Hostess Page (`/hostess`):** No changes.
 - **Step 4: Spin Trigger**
-  - **iPad Controller (`/ipad`):** User taps giant **"СТАРТ"** button. Transitions to **Roulette State (Spin Animation)**. Footer hidden.
+  - **iPad Controller (`/ipad`):** User taps giant **"СТАРТ"** button. Transitions to **Roulette State (Spin Locked Screen)**. Footer hidden.
   - **WebSocket Event:** `ipad -> server: game_spin_trigger`
-  - **TV Screen (`/tv`):** Transitions to **Roulette State**. Starts 10-second vinyl record highlight spin.
+  - **TV Screen (`/tv`):** Transitions to **Roulette State (Spin Animation)**. Starts 10-second vinyl record highlight spin.
   - **Admin Panel (`/admin`):** Increments "Games Played" metrics. Logs spin trigger.
   - **Hostess Page (`/hostess`):** No changes.
 - **Step 5: Spin & Result**
-  - **iPad Controller (`/ipad`):** Plays mechanical sound. Record player animation runs. Interactive controls locked.
+  - **iPad Controller (`/ipad`):** Plays mechanical sound. Record player animation runs. Interactive controls locked in **Roulette State (Spin Locked Screen)**.
   - **WebSocket Event:** `server -> all: game_result { outcome: "prediction", text: "..." }`
   - **TV Screen (`/tv`):** Roulette sequence decelerates and stops on selected record.
   - **Admin Panel (`/admin`):** Randomizer decides prediction message. Logs outcome.
   - **Hostess Page (`/hostess`):** No changes.
 - **Step 6: TV Reveal & Reset Screen**
-  - **iPad Controller (`/ipad`):** Animation ends. Transitions to **Post-Game Reset Screen** displaying "Start Over" button.
+  - **TV Screen (`/tv`):** Transitions to **TV Reveal State (3D Detaching Reveal)**. Selected record detaches, flies to center, and rotates to reveal the motivational prediction.
   - **WebSocket Event:** `tv -> server: prize_displayed`
-  - **TV Screen (`/tv`):** Selected record detaches, flies to center, and rotates to reveal the motivational prediction.
+  - **iPad Controller (`/ipad`):** Animation ends. Transitions to **Post-Game Reset Screen** displaying "Start Over" button.
   - **Admin Panel (`/admin`):** Updates prediction statistics. Logs event description.
   - **Hostess Page (`/hostess`):** No changes.
 - **Step 7: Inactivity Timeout (Default Reset)**
-  - **iPad Controller (`/ipad`):** Player walks away without tapping "Start Over". Timer counts down. iPad resets automatically to **Idle State**.
+  - **iPad Controller (`/ipad`):** Player walks away without tapping "Start Over". Timer counts down. iPad resets automatically to **Idle State (Welcome Screen)**.
   - **WebSocket Event:** *None (30s Local Timer)*
-  - **TV Screen (`/tv`):** TV displays prediction for 3 minutes, then automatically resets to active **Idle State**.
+  - **TV Screen (`/tv`):** TV displays prediction for 3 minutes, then automatically resets to active **Idle State (Variant 1/2)**.
   - **Admin Panel (`/admin`):** Logs: `"iPad reset to Welcome Screen due to inactivity."`
   - **Hostess Page (`/hostess`):** No changes.
 - **Step 8: Start Over (Alternative Reset)**
@@ -161,14 +161,14 @@ This scenario details what happens when the play time runs out or the admin forc
 - **Step 1: Time Limit Expires / Forced End**
   - **Admin Panel (`/admin`):** Day timer hits 0 or Admin toggles **FORCE END OF DAY**. Day logs closed.
   - **WebSocket Event:** `server -> all: game_status_changed { status: "ended" }`
-  - **iPad Controller (`/ipad`):** Transitions to **Idle State (Welcome Screen / Attract Mode)**. "ПОЧАТИ" button disabled.
-  - **TV Screen (`/tv`):** Transitions to **Variant 4 (End of Day / Hall of Fame Mode)** mosaic.
+  - **iPad Controller (`/ipad`):** Transitions to **Idle State (Welcome Screen)**. "ПОЧАТИ" button disabled.
+  - **TV Screen (`/tv`):** Transitions to **Variant 4 (End of Day / Hall of Fame)** mosaic.
   - **Hostess Page (`/hostess`):** Stock displays locked. "Allow Next Player" control hidden.
 - **Step 2: New Day Setup**
   - **Admin Panel (`/admin`):** Admin selects next day from dropdown. Resets prize stocks and winner feed.
   - **WebSocket Event:** `admin -> server: set_active_day { day: 2 }`
-  - **iPad Controller (`/ipad`):** Remains in **Idle State**.
-  - **TV Screen (`/tv`):** Remains in **Variant 4** displaying the completed day's Hall of Fame.
+  - **iPad Controller (`/ipad`):** Remains in **Idle State (Welcome Screen)**.
+  - **TV Screen (`/tv`):** Remains in **Variant 4 (End of Day / Hall of Fame)** displaying the completed day's Hall of Fame.
   - **Hostess Page (`/hostess`):** Hostess session cache invalidated. Prompts for password to access Day 2.
 
 ---
@@ -178,14 +178,14 @@ Details how the system fails safely without exposing browser crashes or operatin
 
 - **Step 1: iPad Offline**
   - **WebSocket Event:** *WebSocket Disconnect*
-  - **iPad Controller (`/ipad`):** Instantly falls back to **Maintenance Screen** (logo, interaction disabled).
-  - **TV Screen (`/tv`):** TV remains active (unless it also disconnected).
+  - **iPad Controller (`/ipad`):** Instantly falls back to **Broke Connection Screen** (visually identical to Maintenance Screen; logo, interaction disabled).
+  - **TV Screen (`/tv`):** TV remains active in its previous state (unless it also disconnected).
   - **Hostess Page (`/hostess`):** Hostess connection badge turns Red; warning modal blocks input.
   - **Admin Panel (`/admin`):** Logs error: "iPad connection lost".
 - **Step 2: TV Offline**
   - **WebSocket Event:** *WebSocket Disconnect*
   - **iPad Controller (`/ipad`):** Remains active (unless it also disconnected).
-  - **TV Screen (`/tv`):** Instantly falls back to **Maintenance Screen** (logo holding screen; non-interactive).
+  - **TV Screen (`/tv`):** Instantly falls back to **Broke Connection Screen** (visually identical to Maintenance Screen; logo holding screen; non-interactive).
   - **Hostess Page (`/hostess`):** Hostess page displays TV connection warning.
   - **Admin Panel (`/admin`):** Logs error: "TV Screen connection lost".
 - **Step 3: Connection Restored**
@@ -227,25 +227,25 @@ Details the experience flow when all physical prize stocks for the active day hi
 - **Step 1: Inventory Depletion Trigger**
   - **Admin Panel (`/admin`):** The last physical prize is claimed. All prize stock levels hit 0. The dashboard warning banner updates: `"Prediction Fallback Mode Active (Stocks Empty)"`.
   - **WebSocket Event:** `server -> all: stock_depleted_notification`
-  - **iPad Controller (`/ipad`):** Remains active and on active **Idle State (Welcome Screen / Attract Mode)**.
-  - **TV Screen (`/tv`):** Remains active showing winners marquee and vinyl grid.
+  - **iPad Controller (`/ipad`):** Remains active and on active **Idle State (Welcome Screen)**.
+  - **TV Screen (`/tv`):** Remains active showing winners marquee and vinyl grid in **Idle State (Variant 1/2)**.
   - **Hostess Page (`/hostess`):** Mobile inventory indicators update to show `0` for all physical prizes. Warning header displays: `"Prediction mode active"`.
 - **Step 2: Participant Registration**
-  - **iPad Controller (`/ipad`):** A new participant clicks **"ПОЧАТИ" (START)**, inputs name, and taps **"ПРОДОВЖИТИ"**.
+  - **iPad Controller (`/ipad`):** A new participant clicks **"ПОЧАТИ" (START)**, inputs name, and taps **"ПРОДОВЖИТИ"**. (Transitions to **Name Entry State**).
   - **WebSocket Event:** `ipad -> server: user_began_registration` followed by `name_submitted { name: "..." }`
   - **TV Screen (`/tv`):** Transitions to **Name Entered State** welcome message.
   - **Admin Panel (`/admin`):** Logs participant registration: `"[Time] Registered participant [Name] (Forced prediction fallback)"`.
   - **Hostess Page (`/hostess`):** No changes.
 - **Step 3: Spin Trigger**
-  - **iPad Controller (`/ipad`):** Participant taps giant **"СТАРТ"** button. Transitions to **Roulette State (Spin Animation)**.
+  - **iPad Controller (`/ipad`):** Participant taps giant **"СТАРТ"** button. Transitions to **Roulette State (Spin Locked Screen)**.
   - **WebSocket Event:** `ipad -> server: game_spin_trigger`
-  - **TV Screen (`/tv`):** Transitions to **Roulette State**. Starts record highlight spin.
+  - **TV Screen (`/tv`):** Transitions to **Roulette State (Spin Animation)**. Starts record highlight spin.
   - **Admin Panel (`/admin`):** Increments games played. Server automatically selects a prediction outcome since physical prize stocks are depleted.
   - **Hostess Page (`/hostess`):** No changes.
 - **Step 4: Result & TV Reveal**
   - **iPad Controller (`/ipad`):** Plays deceleration sounds. Animation ends. Transitions to **Post-Game Reset Screen** showing "Start Over" button.
   - **WebSocket Event:** `server -> all: game_result { outcome: "prediction", text: "..." }` followed by `tv -> server: prize_displayed`
-  - **TV Screen (`/tv`):** Selected record detaches, flies to center, and rotates to reveal the motivational prediction.
+  - **TV Screen (`/tv`):** Transitions to **TV Reveal State (3D Detaching Reveal)**. Selected record detaches, flies to center, and rotates to reveal the motivational prediction.
   - **Admin Panel (`/admin`):** Increments prediction statistics count in logs.
   - **Hostess Page (`/hostess`):** No changes.
 - **Step 5: Reset Loop**
@@ -263,11 +263,11 @@ Covers the hostess pausing the queue to process a winner, manage crowd congestio
 - **Step 1: Pause Trigger (In Game)**
   - **Hostess Page (`/hostess`):** Hostess toggles **PAUSE** on smartphone dashboard during an active roulette spin or registration.
   - **WebSocket Event:** `hostess -> server: game_pause_request`
-  - **iPad Controller (`/ipad`):** Game session continues normally without interruption. Participant can still spin the roulette.
+  - **iPad Controller (`/ipad`):** Game session continues normally without interruption in **Roulette State (Spin Locked Screen)**. Participant can still spin the roulette.
   - **TV Screen (`/tv`):** Roulette spin and reveal animations complete normally on TV screen.
   - **Admin Panel (`/admin`):** Shows pause status queued: "Pause queued (Active game in progress)".
 - **Step 2: TV Reveal & Queue Pause Hook**
-  - **TV Screen (`/tv`):** Selected record detaches, flies to center, and rotates to reveal the prize or prediction.
+  - **TV Screen (`/tv`):** Transitions to **TV Reveal State (3D Detaching Reveal)**. Selected record detaches, flies to center, and rotates to reveal the prize or prediction.
   - **WebSocket Event:** `tv -> server: prize_displayed` (fired from TV once the reveal animation is finished).
   - **iPad Controller (`/ipad`):** Remains on the **Post-Game Reset Screen** displaying the "Start Over" button.
   - **Admin Panel (`/admin`):** Receives reveal completion signal, blocks the launch of new registrations, and prepares pause transition.
@@ -275,15 +275,15 @@ Covers the hostess pausing the queue to process a winner, manage crowd congestio
 - **Step 3: Pause Resolution (Start Over or Timeout)**
   - **Trigger:** Player or hostess taps **"Start Over"** on the iPad, OR the 30-second inactivity timer expires.
   - **WebSocket Event:** `ipad -> server: queue_start_over` (or local 30s timeout event) followed by `server -> all: game_status_changed { status: "paused" }`
-  - **iPad Controller (`/ipad`):** Tapping "Start Over" or waiting for timeout does NOT transition to the Name Entry input. Instead, the iPad transitions directly to the **On Hold / Game Paused State** (Variant Welcoming/Attract Screen showing: "Гра призупинена. Повернемося незабаром" / "I'll be back soon") with start buttons disabled.
-  - **TV Screen (`/tv`):** Transitions back to paused Attract Screen (non-interactive vinyl grid showing "Повернемося незабаром / I'll be back soon").
+  - **iPad Controller (`/ipad`):** Tapping "Start Over" or waiting for timeout does NOT transition to the Name Entry input. Instead, the iPad transitions directly to the **On Hold / Game Paused State** displaying the message "Гра призупинена. Повернемося незабаром" (I'll be back soon) with start buttons disabled.
+  - **TV Screen (`/tv`):** Transitions back to **On Hold / Game Paused State** displaying the message "Повернемося незабаром" (I'll be back soon) on top of the glowing vinyl grid.
   - **Hostess Page (`/hostess`):** Dashboard status indicator turns yellow: "PAUSED". Input fields clear.
   - **Admin Panel (`/admin`):** Dashboard status indicator turns yellow: "PAUSED".
 - **Step 4: Pause Trigger (From Idle State)**
-  - **Hostess Page (`/hostess`):** Hostess toggles **PAUSE** on smartphone dashboard while the system is in active Idle State.
+  - **Hostess Page (`/hostess`):** Hostess toggles **PAUSE** on smartphone dashboard while the system is in active **Idle State**.
   - **WebSocket Event:** `hostess -> server: game_pause_request` followed by `server -> all: game_status_changed { status: "paused" }`
   - **iPad Controller (`/ipad`):** Transitions instantly to **On Hold / Game Paused State** ("I'll be back soon" message; start button disabled).
-  - **TV Screen (`/tv`):** Transitions instantly to paused Attract Screen ("I'll be back soon").
+  - **TV Screen (`/tv`):** Transitions instantly to **On Hold / Game Paused State** ("Повернемося незабаром").
   - **Admin Panel (`/admin`):** Dashboard status indicator turns yellow: "PAUSED".
 - **Step 5: Game Resumed**
   - **Hostess Page (`/hostess`):** Hostess toggles **RESUME** on smartphone dashboard. Dashboard status turns green: "ACTIVE".
